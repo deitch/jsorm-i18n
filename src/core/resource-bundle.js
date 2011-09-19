@@ -65,7 +65,7 @@
  * @config {Object} data Data passed to allow determining timezone information
  * @constructor
  */
-var extend = utils.extend, apply = utils.apply;
+var extend = utils.extend, apply = utils.apply, getFile = utils.getFile;
 exports.ResourceBundle = extend({},function(config){
 	var myclass = this.myclass, superclass = this.superclass, data, entry, lines, entries = {}, i, m;
 	config = config || {};
@@ -253,9 +253,9 @@ exports.ResourceBundle = extend({},function(config){
 
 				// did we already get this one?
 				if (bundles[url] === false) {
-					rbCallback.call(this,false,rbopts);
+					fork({fn:rbCallback,scope:this,arg:[false,rbopts]});
 				} else if (bundles[url]) {
-					rbCallback.call(this,true,rbopts);
+					fork({fn:rbCallback,scope:this,arg:[true,rbopts]});
 				} else {
 					// make the ajax call with the async callback
 					rbopts.rbc = rbCallback;

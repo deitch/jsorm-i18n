@@ -23,7 +23,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 			var resume = function(cal) {
 				test.resume(function(){fn(cal);});
 			};
-			JSORM.i18n_ajax(plugin,function(url,xmlHttp,success,options) {
+			JSORM.getFile(plugin,function(url,xmlHttp,success,options) {
 				if (success) {
 					// we have it loaded
 					retText = xmlHttp.responseText;

@@ -26,6 +26,7 @@ To Use in Nodejs:
  npm install jsorm-i18n
  i18n = require('jsorm-i18n');
 
+Extensive wiki at http://jsorm.com/wiki
 
 
 	

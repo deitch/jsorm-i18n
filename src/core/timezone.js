@@ -30,7 +30,7 @@
  * @constructor
  */
 /*global exports, utils, JSORM, JSON */
-var extend = utils.extend, apply = utils.apply;
+var extend = utils.extend, apply = utils.apply, getFile = utils.getFile, fork = utils.fork;
 exports.TimeZone = extend({},function(n,d) {
 	var zoneData = d, name = n, findTx;
 
@@ -199,9 +199,9 @@ exports.TimeZone = extend({},function(n,d) {
 			var T = myclass(), callback = config.callback, basepath = config.basepath || T.basepath, path = config.path || T.path;
 			// do we already have the list?
 			if (version) {
-				callback.call(this,true,version);
+				fork({fn:callback,scope:this,arg:[true,version]});
 			} else {
-				utils.getFile(basepath+path+'+VERSION',function(url,xmlHttp,success,options) {
+				getFile(basepath+path+'+VERSION',function(url,xmlHttp,success,options) {
 					if (success) {
 						version = xmlHttp.responseText;
 					}
@@ -227,9 +227,9 @@ exports.TimeZone = extend({},function(n,d) {
 			var T = myclass(), callback = config.callback, basepath = config.basepath || T.basepath, path = config.path || T.path;
 			// do we already have the list?
 			if (zonelist) {
-				callback.call(this,true,zonelist);
+				fork({fn:callback,scope:this,arg:[true,zonelist]});
 			} else {
-				utils.getFile(basepath+path+'zones',function(url,xmlHttp,success,options) {
+				getFile(basepath+path+'zones',function(url,xmlHttp,success,options) {
 					if (success) {
 						zonelist = JSON.parse(xmlHttp.responseText);
 					}
@@ -264,12 +264,12 @@ exports.TimeZone = extend({},function(n,d) {
 					zone = tzClass(name,null);
 					zones[name] = zone;				
 				}
-				callback.call(this,true,zone,options);
+				fork({fn:callback,scope:this,arg:[true,zone,options]});
 			} else {
 				// check if it already exists
 				zone = zones[name];
 				if (zone) {
-					callback.call(this,true,zone,options);
+					fork({fn:callback,scope:this,arg:[true,zone,options]});
 				} else {
 					// we need to know if it is a GMT+/-HH:mm timezone
 					// is it a kind that we can process using zoneinfo?
@@ -286,13 +286,13 @@ exports.TimeZone = extend({},function(n,d) {
 							zone = tzClass(zoneName,{leaps:[],transitions:[],types:[[offset,0,zoneName]]});
 							zones[zoneName] = zone;
 						}
-						callback.call(this,true,zone,options);
+						fork({fn:callback,scope:this,arg:[true,zone,options]});
 					} else {
 						// we will try to use zoneinfo
 						basepath = config.basepath || tzClass.basepath;
 						path = config.path || tzClass.path;
 						// we need to set up the correct path
-						utils.getFile(basepath+path+name,function(url,xmlHttp,success,options) {
+						getFile(basepath+path+name,function(url,xmlHttp,success,options) {
 							/*
 							 * Format of the JSON is:
 							 *     {

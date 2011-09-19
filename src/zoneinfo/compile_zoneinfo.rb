@@ -1,5 +1,4 @@
-#!/opt/local/bin/ruby
-#!/usr/bin/env ruby
+#!/usr/local/bin/ruby
 
 =begin
  Script to compile standard Elsie ZoneInfo files into a specialized JSON format

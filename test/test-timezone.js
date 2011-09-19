@@ -15,7 +15,7 @@ testFn.testTimeZone = function(Y) {
 				  "Asia/Tokyo":[["Midsummer 2004",'32400:0:JST',"2004,6,2,1,0,0"],["Midwinter 2004",'32400:0:JST',"2004,1,2,1,0,0"]]
 				};
 	// expected version and number of zones
-	var expectedVersion = "2009b", numZones = 401;
+	var expectedVersion = "2009u", numZones = 402;
 	
 	T.basepath =  '../';
 	T.path = 'build/zoneinfo/';
@@ -37,7 +37,7 @@ testFn.testTimeZone = function(Y) {
 					Y.Assert.areEqual(expectedVersion,version,"Version mismatch");					
 				});
 			}});
-			this.wait(3000);
+			test.wait(3000);
 		},
 		testNumZones : function() {
 			var test = this;
@@ -90,6 +90,7 @@ testFn.testTimeZone = function(Y) {
 				tzZones[zone.getName()] = zone;
 				count++;
 				if (count === list.length) {
+					console.log("resume");
 					test.resume(function() {
 						var tz,info,infoStr,d,message,expect, i, j;
 						// check several during midsummer and midwinter
@@ -116,6 +117,7 @@ testFn.testTimeZone = function(Y) {
 				T.getZone({name: list[i],callback: cb});					
 				
 			}
+			console.log("wait");
 			this.wait(3000);
 		}
 	});

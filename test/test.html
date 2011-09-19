@@ -1,15 +1,31 @@
 <html>
 	<head>
 		<title>jsorm i18n Test Application</title>
-		<script src="../../yui_3.0.0.pr2/build/yui/yui-min.js"></script> 
+		<script src="http://yui.yahooapis.com/3.3.0/build/yui/yui-min.js"></script> 
 		<script src="jsorm.js"></script>
 		<script src="jsorm-i18n-src.js"></script>
 		<!-- holder for calendar implementation tests -->
 		<script type="text/javascript">
-			var calImplTests = [], testFn = {};
+			var tests = [
+				"ALL","Calendar","Currency","ResourceBundle","TimeZone",
+				"Gregorian Calendar","Julian Calendar","Hebrew Calendar","Islamic Calendar","Sym454 Calendar","Sym010 Calendar"
+			],calImplTests = [], testFn = {
+				testALL: function(Y) {
+					var i, suite, testName;
+					// run all of them except myself
+					suite = new Y.Test.Suite("ALL Tests");
+					for (i=0;i<tests.length;i++) {
+						testName = "test"+tests[i].charAt(0).toUpperCase() + tests[i].slice(1);
+						testName = testName.replace(/\s+/g,"");
+						if (testName !== "testALL" && testFn && testFn[testName]) {
+							suite.add(testFn[testName](Y));
+						}
+					}
+					return suite;
+				}
+			};
 		</script>
 
-		<script src="test-core.js"></script>
 		<script src="test-calendar.js"></script>
 		<script src="test-currency.js"></script>
 		<script src="test-resourcebundle.js"></script>
@@ -28,14 +44,10 @@
 		
 		<script type="text/javascript">
 			/*global YUI */
-			var tests = [
-				"ALL","Calendar","Currency","ResourceBundle","TimeZone",
-				"Gregorian Calendar","Julian Calendar","Hebrew Calendar","Islamic Calendar","Sym454 Calendar","Sym010 Calendar"
-			];
 			function go(test) {
-				var local = true, conf, f;
+				var local = false, conf, f;
 				conf = {
-					base: '../../yui_3.0.0.pr2/build/'
+					base: 'yui/'
 				};
 				f = (function() {
 					return function(Y) {
@@ -59,7 +71,7 @@
 						Y.Test.Runner.run();						
 					};
 				}());
-				YUI(local?conf:null).use("yuitest","console",f);
+				YUI().use("test","console",f);
 				return(false);
 			}
 			function init() {
@@ -100,7 +112,7 @@
 			<ul id="testList">
 			</ul>
 		</div>
-		<div id="results" style="float:left;"></div>
+		<div id="results" class="yui3-skin-sam" style="float:left;"></div>
 
 	</body>
 </html>

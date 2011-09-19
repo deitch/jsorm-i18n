@@ -28,7 +28,7 @@ var utils = {
 	getFile : function(fileName,callback,options) {
 		var fs;
 		// need to determine if we are running in node or on a client-side
-		if (module !== undefined && module.exports !== undefined && require !== undefined && typeof(require) === "function") {
+		if (typeof module !== "undefined" && typeof module.exports !== "undefined" && typeof require !== "undefined" && typeof(require) === "function") {
 			fs = require('fs');
 			fs.readFile(fileName,function(err,data){
 				var xmlHttp = {}, success;
@@ -49,5 +49,9 @@ var utils = {
 	},
 	apply: JSORM.apply,
 	extend: JSORM.extend,
-	zeropad: JSORM.zeropad
+	zeropad: JSORM.zeropad,
+	fork: JSORM.fork
 };
+
+// save getFile
+exports.getFile = utils.getFile;
