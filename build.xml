@@ -34,10 +34,9 @@
   <property name="zonevalidater" value="${src}/zoneinfo/process_binary_zi.rb"/>
   <property name="privatedoc" value="${src}/doc/private"/>
   <property name="doc" value="${build}/doc"/>
-  <property name="jsdochome" value="/Users/adeitcher/Documents/Development/JavaScript/jsdoc_toolkit-1.4.0mod"/>
+  <property name="jsdochome" value="../jsdoc_toolkit-1.4.0mod"/>
   <property name="jsdoc" value="${jsdochome}/jsdoc"/>
   <property name="testhtml" value="test/test.html"/>
-  <property name="jsorm-base" value="../jsormutil/dist/jsorm-1.0-min-nolicense.js"/>
 
 
 <taskdef name="jsmin"
@@ -53,7 +52,6 @@
 		<concat destfile="${build}/${expfile}">
 			<fileset file="${src}/00license.js"/>
 			<fileset file="${core}/000pre.js"/>
-			<fileset file="${jsorm-base}"/>
 			<filelist dir="${core}" files="${srcfiles}"/>
 			<fileset file="${core}/000post.js"/>
 		</concat>

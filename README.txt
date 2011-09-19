@@ -18,6 +18,15 @@
      full localization. E.g. one can get a Calendar, set the date to April 6, 2005 13:25:32 567 in the 
      timezone Australia/Sydney, add 2 months and 3 days to the date, then format it using calendar.format()
 
+To Use in Browser:
+ Include jsorm-utilities http://github.com/deitch/jsorm-utilities
+ Include jsorm-i18n.js
+
+To Use in Nodejs:
+ npm install jsorm-i18n
+ i18n = require('jsorm-i18n');
+
+
 
 	
 
