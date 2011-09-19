@@ -1,5 +1,5 @@
-/*global JSORM */
-function testCurrency(Y) {
+/*global JSORM, testFn */
+testFn.testCurrency = function(Y) {
 	var C = JSORM.currency;
 	// list of zones to test and test inputs and expected outputs
 	// each key is the name of a zone to load and check
@@ -69,4 +69,4 @@ function testCurrency(Y) {
 			}
 		}	
 	});
-}
+};

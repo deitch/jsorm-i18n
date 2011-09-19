@@ -1,5 +1,5 @@
 /*global JSORM */
-calImplTests.push({name: "Julian Calendar",fn: function(Y) {
+testFn.testJulianCalendar = function(Y) {
 	var cal;
 	var retText = null;
 
@@ -99,5 +99,5 @@ calImplTests.push({name: "Julian Calendar",fn: function(Y) {
 	// get the configuration object literal
 	var o = testCalImpl(Y,"Julian Calendar Tests","../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return new Y.Test.Case(o);
-}});
+};
 

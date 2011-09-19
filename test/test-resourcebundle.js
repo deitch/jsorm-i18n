@@ -1,5 +1,5 @@
 /*global JSORM */
-function testResourceBundle(Y) {
+testFn.testResourceBundle = function(Y) {
 	var B = JSORM.ResourceBundle;
 	// set paths
 	B.path = 'core/';
@@ -113,4 +113,4 @@ function testResourceBundle(Y) {
 		}
 		
 	});
-}
+};

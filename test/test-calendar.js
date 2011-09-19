@@ -1,5 +1,5 @@
 /*global JSORM */
-function testCalendar(Y) {
+testFn.testCalendar = function(Y) {
 	// centralize all of these calls
 	var C = JSORM.calendar, T = JSORM.TimeZone;
 
@@ -2363,4 +2363,4 @@ function testCalendar(Y) {
 		}	
 		
 	});
-}
+};

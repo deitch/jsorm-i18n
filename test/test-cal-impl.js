@@ -1,5 +1,5 @@
 /*global JSORM */
-function testCalImpl(Y,name,plugin,years,maxDates,refDates,startOfDay) {
+testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 	var cal;
 	var retText = null;
 
@@ -114,5 +114,5 @@ function testCalImpl(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 			});
 		}
 	};
-}
+};
 

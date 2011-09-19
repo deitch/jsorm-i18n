@@ -1,5 +1,5 @@
 /*global JSORM */
-calImplTests.push({name: "Sym010 Calendar",fn: function(Y) {
+testFn.testSym010Calendar = function(Y) {
 	var cal;
 
 	// test bundles: [rd,m,y,d,dow]
@@ -143,5 +143,5 @@ calImplTests.push({name: "Sym010 Calendar",fn: function(Y) {
 	// get the configuration object literal
 	var o = testCalImpl(Y,"Sym010 Calendar Tests","../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return new Y.Test.Case(o);
-}});
+};
 

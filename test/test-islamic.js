@@ -1,5 +1,5 @@
 /*global JSORM */
-calImplTests.push({name: "Islamic Calendar",fn: function(Y) {
+testFn.testIslamicCalendar = function(Y) {
 	var cal;
 	var retText = null;
 
@@ -88,5 +88,5 @@ calImplTests.push({name: "Islamic Calendar",fn: function(Y) {
 
 	var o = testCalImpl(Y,"Islamic Calendar Tests","../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
 	return new Y.Test.Case(o);
-}});
+};
 

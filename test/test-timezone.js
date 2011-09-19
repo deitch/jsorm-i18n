@@ -1,5 +1,5 @@
-/*global JSORM */
-function testTimeZone(Y) {
+/*global JSORM, testFn */
+testFn.testTimeZone = function(Y) {
 	var T = JSORM.TimeZone;
 	// list of zones to test and test inputs and expected outputs
 	// each key is the name of a zone to load and check
@@ -119,4 +119,4 @@ function testTimeZone(Y) {
 			this.wait(3000);
 		}
 	});
-}
+};
