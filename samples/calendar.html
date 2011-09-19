@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+	<head>
+		<title>Calendar Sample</title>
+		<script type="text/javascript" src="jsorm-i18n-src.js"></script>
+		<script type="text/javascript">
+		var zone, cal, listSelect, yField, mField, dField, hField, minField, secField, offsetField, dstField, abbrField;
+		var year, month, date, hour, hourOfDay, minute, second, millisecond, amPm, dayOfYear, dayOfWeek, dayOfWeekInMonth, era;
+		var time, weekOfMonth, weekOfYear;
+		function load() {
+			// get references to the key form elements
+			listSelect = document.getElementById('zoneList');
+			year = document.getElementById('year');
+			month = document.getElementById('month');
+			date = document.getElementById('date');
+			hour = document.getElementById('hour');
+			hourOfDay = document.getElementById('hour_of_day');
+			minute = document.getElementById('minute');
+			second = document.getElementById('second');
+			millisecond = document.getElementById('millisecond');
+			amPm = document.getElementById('am_pm');
+			dayOfYear = document.getElementById('day_of_year');
+			dayOfWeek = document.getElementById('day_of_week');
+			dayOfWeekInMonth = document.getElementById('day_of_week_in_month');
+			era = document.getElementById('era');
+			time = document.getElementById('time');
+			weekOfMonth = document.getElementById('week_of_month');
+			weekOfYear = document.getElementById('week_of_year');
+
+			// set the initial time to be right now
+			time.value = new Date().getTime();
+
+			// make sure we are using only the local path
+			JSORM.TimeZone.basepath = './';
+			JSORM.TimeZone.path = 'zoneinfo/';
+			
+			// defaults for loading Calendars
+			JSORM.calendar.basePath = './';
+			JSORM.calendar.calendarPath = 'calendars/';
+
+			// this is how we load a new zone and then initialize the calendar
+			var defZone = 'America/Montreal';
+			var config = {basepath: './', path: 'zoneinfo/', name: defZone, callback: function(success,loadzone,options) {
+				if (success) {
+					zone = loadzone;
+					var config = {zone: zone, date: new Date(), calendar: 'gregorian', callback: function(success,obj,opts) {
+						cal = obj;
+						doSetOutput();
+					}};
+					JSORM.calendar.getCalendar(config);
+				}
+			}};
+			JSORM.TimeZone.getZone(config);
+			
+
+			// load up the zone list
+			JSORM.TimeZone.getZoneList({callback: function(success,zones,opts) {
+				if (success) {
+					// set the select options to be from the list
+					var list = [];
+					for (var z in zones.zones) {
+						list.push(z);
+					}
+					list = list.sort();
+					for (var i=0; i<list.length; i++) {
+						listSelect.options[i] = new Option(list[i],list[i]);
+					}		
+					// initialize for our default of America/Montreal			
+					listSelect.value = defZone;
+				}
+			}});
+			
+		}
+		function doSetOutput() {
+			// get the values for setting
+			var y = parseInt(year.value), m = parseInt(month.value), d = parseInt(date.value);
+			var h = parseInt(hourOfDay.value), min = parseInt(minute.value), sec = parseInt(second.value);
+
+			year.value = cal.getYear();
+			month.value = cal.getMonth();
+			date.value = cal.getDate();
+			hour.value = cal.getHour();
+			hourOfDay.value = cal.getHourOfDay();
+			minute.value = cal.getMinute();
+			second.value = cal.getSecond();
+			millisecond.value = cal.getMillisecond();
+			amPm.value = cal.getAmPm();
+			dayOfYear.value = cal.getDayOfYear();
+			dayOfWeek.value = cal.getDayOfWeek();
+			dayOfWeekInMonth.value = cal.getDayOfWeekInMonth();
+			era.value = cal.getEra();
+			weekOfMonth.value = cal.getWeekOfMonth();
+			weekOfYear.value = cal.getWeekOfYear();
+			time.value = cal.getTime();
+		}
+		function setDirty(field) {
+			cal.set(field.id.toUpperCase(),parseInt(field.value));
+		}
+		function processTime(field) {
+			cal.setTime(parseInt(field.value));
+			doSetOutput();
+		}
+		function roll(field) {
+			// first process any field changes
+			processFields();
+			// next, get the name of the field and the value
+			var fieldName = field.id.toUpperCase().slice(0,-4);
+			var delta = parseInt(field.value);
+			field.value = "";
+			cal.roll(fieldName,delta);
+			doSetOutput();
+		}
+		function add(field) {
+			// first process any field changes
+			processFields();
+			// next, get the name of the field and the value
+			var fieldName = field.id.toUpperCase().slice(0,-3);
+			var delta = parseInt(field.value);
+			field.value = "";
+			cal.add(fieldName,delta);
+			doSetOutput();
+		}
+		function processFields() {
+			// any get will force it to recalculate
+			var y = cal.getYear();
+			doSetOutput();
+		}
+		function doSelect() {
+			// process only if we already have one
+			if (cal) {
+				processFields();
+			}
+			// what new currency, if any, do we want?
+			var newZone = listSelect.value;
+			if (zone == null || zone.getName() != newZone) {
+				// this is how we load a new zone
+				var config = {basepath: './', path: 'zoneinfo/', name: newZone, callback: function(success,loadzone,options) {
+					if (success) {
+						zone = loadzone;
+						cal.setZone(zone);
+						doSetOutput();
+					}
+				}};
+				JSORM.TimeZone.getZone(config);
+			} else {
+				doSetOutput();
+			}
+		}
+		</script>
+	</head>
+	<body onload="load()">
+		<div id="sample">
+			<div id="instructions">
+				<h2>Instructions</h2>
+			Be sure to examine the source code to this file. All the example code is include in a script tag.<br/>
+			It is also <b>strongly</b> recommended that you run this at least once in <a href="http://www.mozilla.com/firefox">Firefox</a> 
+			with <a href="http://getfirebug.com">Firebug</a> installed, so you can see how and when TimeZone searches for
+			resources from the server.
+			<p/>
+			All of the fields below are the fields returned by Calendar. You can modify any of the following:
+			<ul>
+				<li><u>Timezone</u>: This immediately changes all the fields.</li>
+				<li><u>Time</u>: This immediately changes all the fields.</li>
+				<li><u>Other</u>: Any other editable field. The fields will not recalculate until you press the "Calc" button, or change an immediately recalculating field, such as Timezone, Time or Roll/Add.</li>
+			</ul>
+			You can also roll or add any editable field by entering a non-zero number in the roll or add entry. This will immediately
+			recalculate all fields.<br/>
+			The list of selectable zones is taken from TimeZone.getZoneList().<br/>
+			 <br/>
+			</div>
+			<div id="output">
+				<form>
+					<table>
+					<tr><td>Timezone:</td><td><select id="zoneList" onchange="doSelect();"></select></td></tr>
+					<tr><td>Absolute time:</td><td><input id="time" type="text" value="" onchange="processTime(this);"></input></td></tr>
+					<tr><td></td><td><input type="button" value="Calc" onclick="processFields();"></input></td></tr>
+					</table>
+					<table>
+						<tr><th>Field</th><th>Range</th><th>Value</th><th>Roll</th><th>Add</th></tr>
+						<tr><td>YEAR</td><td>-100000 - +100000</td><td><input id="year" size="5" style="text-align:right" type="text" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="yearRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="yearAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>MONTH</td><td>0-11</td><td><input id="month" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="monthRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="monthAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>DATE</td><td>0-30</td><td><input id="date" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="dateRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="dateAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>HOUR</td><td>1-12</td><td><input id="hour" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="hourRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="hourAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>HOUR_OF_DAY</td><td>0-23</td><td><input id="hour_of_day" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="hour_of_dayRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="hour_of_dayAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>AM_PM</td><td>0-1</td><td><input id="am_pm" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="am_pmRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="am_pmAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>MINUTE</td><td>0-59</td><td><input id="minute" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="minuteRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="minuteAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>SECOND</td><td>0-59</td><td><input id="second" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="secondRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="secondAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>MILLISECOND</td><td>0-999</td><td><input id="millisecond" type="text" size="5" style="text-align:right" value="" onchange="setDirty(this);"></input></td><td><input type="text" id="millisecondRoll" style="text-align:right" size="5" value="" onchange="roll(this);"></input></td><td><input type="text" id="millisecondAdd" style="text-align:right" size="5" value="" onchange="add(this);"></input></td></tr>
+						<tr><td>DAY_OF_YEAR</td><td>0-365</td><td><input id="day_of_year" type="text" disabled="true" size="5" style="text-align:right" value=""></input></td></tr>
+						<tr><td>DAY_OF_WEEK</td><td>0-6</td><td><input id="day_of_week" type="text" disabled="true" size="5" style="text-align:right" value=""></input></td></tr>
+						<tr><td>DAY_OF_WEEK_IN_MONTH</td><td>1-5</td><td><input id="day_of_week_in_month" type="text" size="5" style="text-align:right" disabled="true" value=""></input></td></tr>
+						<tr><td>ERA</td><td>0-1</td><td><input id="era" type="text" disabled="true" size="5" style="text-align:right" value=""></input></td></tr>
+						<tr><td>WEEK_OF_MONTH</td><td>0-4</td><td><input id="week_of_month" type="text" size="5" style="text-align:right" disabled="true" value=""></input></td></tr>
+						<tr><td>WEEK_OF_YEAR</td><td>0-52</td><td><input id="week_of_year" type="text" disabled="true" size="5" style="text-align:right" value=""></input></td></tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

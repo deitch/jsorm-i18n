@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+	<head>
+		<title>Currency Sample</title>
+		<script type="text/javascript" src="jsorm-i18n.js"></script>
+		<script type="text/javascript">
+		var cur, curSelect, curValue, formatted, currencyName, currencyCountry;
+		function load() {
+			// get references to the key form elements
+			curSelect = document.getElementById('curList');
+			curValue = document.getElementById('curValue');
+			formatted = document.getElementById('formatted');
+			currencyName = document.getElementById('currencyName');
+			currencyCountry = document.getElementById('currencyCountry');
+			
+			// load up the currency list
+			var curlist = JSORM.currency.getCurrencies().sort();
+			// set the select options to be from the list
+			for (i=0;i<curlist.length;i++) {
+				curSelect.options[i] = new Option(curlist[i],curlist[i]);
+			}
+		}
+		function doCur() {
+			// what new currency, if any, do we want?
+			var newCur = curSelect.value;
+			if (cur == null || cur.getAbbreviation() != newCur) {
+				// this is how we instantiate a new currency element
+				cur = JSORM.currency(newCur);
+				// get the name and country and set them
+				currencyName.value = cur.getName();
+				currencyCountry.value = cur.getCountry();
+			}
+			// set the formatted value
+			formatted.value = cur.format(curValue.value);
+			
+		}
+		</script>
+	</head>
+	<body onload="load()">
+		<div id="sample">
+			<div id="instructions">
+				<h2>Instructions</h2>
+			Be sure to examine the source code to this file. All the example code is include in a script tag.
+			<p/>
+			Enter an amount and select a currency. The formatted currency will be displayed in the text box. The list of 
+			currencies from the select is populated using JSORM.currency.getCurrencies()
+			 <br/>
+			</div>
+			<div id="output">
+				<form>
+					<input id="curValue" type="text" value="0.00" onchange="doCur();"></input>
+					<select id="curList" onchange="doCur();"></select>
+					<p/>
+					<table>
+						<tr><td>Formatted value:</td><td><input id="formatted" type="text" disabled="true" value=""></input></td></tr>
+						<tr><td>Currency name:</td><td><input id="currencyName" type="text" disabled="true" value=""></input></td></tr>
+						<tr><td>Currency country:</td><td><input id="currencyCountry" type="text" disabled="true" value=""></input></td></tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

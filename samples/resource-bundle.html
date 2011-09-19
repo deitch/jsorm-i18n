@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+	<head>
+		<title>ResourceBundle Sample</title>
+		<script type="text/javascript" src="jsorm-i18n.js"></script>
+		<script type="text/javascript">
+		var locale, langField, helloField, goodbyeField;
+		function load() {
+			// get references to the key form elements
+			langField = document.getElementById('langList');
+			helloField = document.getElementById('hello');
+			goodbyeField = document.getElementById('goodbye');
+		}
+		function doSelect() {
+			// what new currency, if any, do we want?
+			var newLocale = langField.value;
+			if (locale == null || locale.givenLocale != newLocale) {
+				// this is how we load a new bundle
+				var config = {path: './', locale: newLocale, name: 'MyBundle', callback: function(success,bundle,options) {
+					if (success) {
+						locale = bundle;
+						helloField.value = locale.get('hello');
+						goodbyeField.value = locale.get('goodbye');
+					}
+				}};
+				JSORM.ResourceBundle.getBundle(config);
+			}
+		}
+		</script>
+	</head>
+	<body onload="load()">
+		<div id="sample">
+			<div id="instructions">
+				<h2>Instructions</h2>
+			Be sure to examine the source code to this file. All the example code is include in a script tag.<br/>
+			It is also <b>strongly</b> recommended that you run this at least once in <a href="http://www.mozilla.com/firefox">Firefox</a> 
+			with <a href="http://getfirebug.com">Firebug</a> installed, so you can see how and when ResourceBundle searches for
+			resources from the server.
+			<p/>
+			Select a language. The value of the keys in the left column will be shown in the right column.
+			 <br/>
+			</div>
+			<div id="output">
+				<form>
+					<select id="langList" onchange="doSelect();"><option value="en_US" selected>en_US</option><option value="fr_FR" selected>fr_FR</option></select>
+					<p/>
+					<table>
+						<tr><th>Key</th><th>Value</th></tr>
+						<tr><td>hello</td><td><input id="hello" type="text" disabled="true" value=""></input></td></tr>
+						<tr><td>goodbye</td><td><input id="goodbye" type="text" disabled="true" value=""></input></td></tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

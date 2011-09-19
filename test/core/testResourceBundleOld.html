@@ -1,0 +1,101 @@
+<html>
+ <head>
+  <title>Test Page for ResourceBundle.js Module</title>
+  <script language="javascript" src="../../../jsunit/app/jsUnitCore.js"></script>
+</head>
+ <body>
+ 	<script language="javascript" src="../../src/core/base.js"></script>
+ 	<script language="javascript" src="../../src/core/resource-bundle.js"></script>
+	<script language="javascript">
+	var testBundles = {};
+	// to hold our setUpPageStatus
+	var setUpPageCount = 0, setUpPageRequired = 6;
+	var inRunner = true;
+	// initial set up, following which we run the test
+	function setUpNative() {
+		inRunner = false;
+		setUpPage();
+	}
+	function incrSetupCount() {
+		setUpPageCount++;
+		if (setUpPageCount >= setUpPageRequired) {
+			setUpPageStatus = 'complete';					
+		}
+	}
+	function setUpPage() {
+		// set paths
+		var basepath =  inRunner ? '../../JavaScript/i18n/' : '../../';
+		jsorm.ResourceBundle.path = basepath+'test/core/';
+		
+		// get the bundles we need
+		var callback = function(success,bundle,options){
+			testBundles[options.name] = bundle;
+			incrSetupCount();
+		};
+		jsorm.ResourceBundle.getBundle({name:'MyBundle',locale:'en_US',callback:callback,options: {name: 'en_US'}});
+		jsorm.ResourceBundle.getBundle({name:'MyBundle',locale:'fr_FR',callback:callback,options: {name: 'fr_FR'}});
+		jsorm.ResourceBundle.getBundle({name:'MyBundle',locale:'FOO',callback:callback,options: {name: 'foo'}});
+		jsorm.ResourceBundle.getBundle({name:'MyBundle',locale:'',callback:callback,options: {name: 'blank'}});
+		jsorm.ResourceBundle.getBundle({name:'MyBundle',locale:null,callback:callback,options: {name: 'nil'}});
+		jsorm.ResourceBundle.getBundle({name:'MyBundle2',locale:'en_US',callback:callback,options: {name: 'bad'}});
+	}
+	</script>
+  <script language="javascript">
+	/*
+	 * Functions to test currency functionality.
+	 * These are the tests we want to perform:
+	 * 1) basename returns the appropriate list
+	 * 2) retrieve a bundle successfully
+	 * 3) error for an invalid bundle
+	 * 4) Unknown locale but valid bundle falls back appropriately
+	 * 5) Retrieve a key from a bundle
+	 * 6) Retrieve the same key from a bundle in two different locales gives two different results
+	 */
+	function testBasename() {
+		var list, listStr, validList;
+		// en_US
+		list = jsorm.ResourceBundle.baseName('MyBundle','en_US');
+		validList = 'MyBundle_en_US:MyBundle_en:MyBundle';
+		listStr = list == null ? '' : list.join(':');
+		assertEquals("MyBundle en_US",validList,listStr);
+		// en_GB
+		list = jsorm.ResourceBundle.baseName('MyBundle','en_GB');
+		validList = 'MyBundle_en_GB:MyBundle_en:MyBundle_en_US:MyBundle';
+		listStr = list == null ? '' : list.join(':');
+		assertEquals("MyBundle en_GB",validList,listStr);
+		// fr_FR
+		list = jsorm.ResourceBundle.baseName('MyBundle','fr_FR');
+		validList = 'MyBundle_fr_FR:MyBundle_fr:MyBundle_en_US:MyBundle_en:MyBundle';
+		listStr = list == null ? '' : list.join(':');
+		assertEquals("MyBundle fr_FR",validList,listStr);
+	}
+	function testRetrieve() {
+		assertNotNull("MyBundle en_US retrieval",testBundles.en_US);
+		assertNotNull("MyBundle fr_FR retrieval",testBundles.fr_FR);
+	}
+	function testBadLocale() {
+		assertNotNull("MyBundle FOO locale bad should revert to default en_US",testBundles.foo);
+		assertEquals("MyBundle FOO locale bad should revert to en_US",testBundles.foo.locale,jsorm.ResourceBundle.defaultLocale);
+	}
+	function testEmptyLocale() {
+		assertNotNull("MyBundle <blank> locale bad should revert to default en_US",testBundles.blank);
+		assertEquals("MyBundle <blank> locale bad should revert to en_US",testBundles.blank.locale,jsorm.ResourceBundle.defaultLocale);
+	}
+	function testNullLocale() {
+		assertNotNull("MyBundle null locale bad should revert to default en_US",testBundles.nil);
+		assertEquals("MyBundle null locale bad should revert to en_US",testBundles.nil.locale,jsorm.ResourceBundle.defaultLocale);
+	}
+	function testInvalidBundle() {
+		assertNull("MyBundle2 bad bundlename should remain null",testBundles.bad);
+	}
+	function testKeys() {
+		var enUsKey = testBundles.en_US.get("hello");
+		var frFrKey = testBundles.fr_FR.get("hello");
+		assertNotNull("Should be hello",enUsKey);
+		assertNotNull("Should be bonjour",frFrKey);
+		assertEquals("Should be hello","hello",enUsKey);
+		assertEquals("Should be bonjour","bonjour",frFrKey);
+	}
+  </script>
+ </body>
+</html>

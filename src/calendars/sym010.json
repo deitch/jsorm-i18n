@@ -1,0 +1,182 @@
+	/**
+ * @class Sym010Calendar is an object-literal that implements the necessary implementation contract for a CalendarImpl.
+ * This object literal is used as the prototype for a Sym010Calendar, which is processed and created by Calendar.
+ * @name jsorm.Sym010Calendar
+ * @static
+ */
+/** @scope JSORM.Sym010Calendar.prototype */ 
+{
+	getName : function(){return("sym010");},
+	// day of RD0
+	RD0_DAYS : 1,
+	// Days from RD0 to system epoch
+	EPOCH_DAYS : 719163,
+	YEARS_IN_CYCLE : 293,
+	LEAPS_IN_CYCLE : 52,
+	DAYS_IN_CYCLE: 107016,
+	DAYS_IN_AVG_YEAR: 107016/293,
+	DAYS_IN_1_YEAR: 364,
+	DAYS_IN_LEAP_YEAR: 371,
+	CE : 1,
+	BCE : 0,
+	AD : 1,
+	BC : 0,
+
+	/**
+	 * Default locale is English US
+	 */
+	getDefaultLocale : function(){return('en_US');},
+
+	_defaultLocaleInfo : {
+			SUNDAY : 'Sunday:Sun', MONDAY: 'Monday:Mon', TUESDAY: 'Tuesday:Tue', WEDNESDAY: 'Wednesday:Wed',
+			THURSDAY: 'Thursday:Thu', FRIDAY: 'Friday:Fri', SATURDAY: 'Saturday:Sat',
+			JANUARY: 'January:Jan', FEBRUARY: 'February:Feb', MARCH: 'March:Mar', APRIL: 'April:Apr', MAY: 'May:May',
+			JUNE: 'June:Jun', JULY: 'July:Jul', AUGUST: 'August:Aug', SEPTEMBER: 'September:Sep', 
+			OCTOBER: 'October:Oct', NOVEMBER: 'November:Nov', DECEMBER: 'December:Dec',
+			AM: 'AM', PM: 'PM', ERA0: 'BCE', ERA1: 'CE', COUNT0: 'th', COUNT1: 'st', COUNT2: 'nd', COUNT3: 'rd',
+			COUNT21: 'st', COUNT22: 'nd', COUNT23: 'rd', COUNT31: 'st', COUNTN: 'th'
+	},
+	
+
+	/**
+	 * Default locale info
+	 * @private
+	 */
+	getDefaultLocaleInfo : function(key){return(this._defaultLocaleInfo[key]);},
+	
+	getStartOfDay : function(){return(JSORM.calendar.MIDNIGHT);},
+
+	/**
+	 * List of functions to determine the maximum or minimum allowed for a field
+	 */
+	getMaxYear : function(era) { return(era == 1 ? 100000000000000 : -1);},
+	getMaxMonth : function(era,year) {return(12);},
+	// remember, we use 0-11 internally, but the API gives 1-12
+	getMaxDate : function(era,year,month) {return(30+ (Math.floor(this.mod(month,3)/2) || 7*(this.isLeapYear(year)&&(month==12))));},
+	getMaxEra : function() {return(1);},
+	getMaxDayOfYear : function(era,year){return(this.isLeapYear(year)?this.DAYS_IN_LEAP_YEAR:this.DAYS_IN_1_YEAR);},
+
+	/**
+	 * List of functions to determine the minimum allowed for a field
+	 */
+	getMinYear : function(era){ return(era == 1 ? 1 : -100000000000000);},
+	getMinMonth : function(era,year) {return(1);},
+	getMinDate : function(era,year,month) {return(1);},
+	getMinEra : function() {return(0);},
+	getMinDayOfYear : function(era,year) { return(1);},
+
+	/**
+	 * determine if a year is a leap year
+	 * leaps is just a cache so we do not recalculate
+	 * @private
+	 */
+	leaps : {},
+	isLeapYear : function(y) {
+		var leaps = this.leaps;
+		// cache for future use to make it quicker
+		if (leaps[y] === undefined) {
+			leaps[y] = this.mod(this.LEAPS_IN_CYCLE*y+146,this.YEARS_IN_CYCLE) < this.LEAPS_IN_CYCLE;
+		}
+		return(leaps[y]);
+	},
+	/**
+	 * Special mod function. The general javascript % (mod) function will return the same sign (positive or negative) of the
+	 * numerator. E.g. -1%3 = -1, while 1%3 = 1. We need a mod function that always follows the denominator, e.g. -1%3 = 1, 
+	 * while 1%-3 = 1.
+	 * @private
+	 */
+	mod : function(x,y) {return ( x - y*(Math.floor(x/y)));},
+	
+	/**
+	 * Function to return the number of days from the RD epoch (1 January 1 CE) to the given date.
+	 * In some calendaring systems, where the day may transition at points other than midnight, this may give
+	 * different answers depending on the time of day. For Sym454, it is the same. This function is private and
+	 * is intended to be used internally only.
+	 * @param {int} e the era in the Sym454 calendar, 0 for BCE/BC and 1 for CE/AD. Note that if this is 1, and the year is
+	 * 				negative, it is equivalent to a positive number BCE/BC. 
+	 * @param {int} y the year in the Sym454 calendar
+	 * @param {int} m the month in the given year. This is from 0 (January) to 11 (December).
+	 * @param {int} d the year in the given month. This is from 0 to 28 or 35
+	 * @return {long} number of days since the RD 0, i.e. Monday, 1 January 1 CE
+	 * @private
+	 */
+	calendarToDays : function(e,y,m,d) {
+		// deal with era - if the era is BCE, we ignore the era and treat the year as negative
+		if (e === this.BCE && y > 1) {
+			y *= -1;
+		}
+		var epoch = 1;
+		// first the days in whole years
+		var yearDays = this.DAYS_IN_1_YEAR*(y-1);
+		// next the number of leap years in that number of years, multiplied by leap days in each year (7)
+		var leapDays = 7*(Math.floor((this.LEAPS_IN_CYCLE*(y-1)+146)/this.YEARS_IN_CYCLE));
+		// there are 30 days in each regular month, and 1 extra day for the middle month in each quarter
+		var monthDays = 30*(m-1)+Math.floor(m/3);
+		var fd = yearDays + leapDays + monthDays + d;
+		//console.log("e/y/m/d "+e+"/"+y+"/"+m+"/"+d);
+		//console.log("yearDays/leapDays/monthDays/d " +yearDays+"/"+leapDays+"/"+monthDays+"/"+d);
+		return(fd);
+	},
+	/**
+	 * Function to return the Gregorian date of a given number of days from the RD epoch (1 January 1 CE).
+	 * In some calendaring systems, where the day may transition at points other than midnight, this may give
+	 * different answers depending on the time of day. For Gregorian, it is the same. This function is private and
+	 * is intended to be used internally only.
+	 * @param {long} date the number of days since the RD 0, i.e. 1 January 1 CE
+	 	* @return {Object} with relevant calculated information. The keys to the object are as follows:
+	 * YEAR: the year in the Gregorian calendar
+	 * MONTH: the month in the given year, from 0 (January) to 11 (December)
+	 * DATE: the date in the given month, from 0 to 27 or 34, depending on the month
+	 * DAY_OF_YEAR: the day of the given year this is, from 0 (1 January) to 363 or 370
+	 * LEAP: number of leap days in the given year, either 1 or 0
+	 * ERA: 1 for AD/CE, 0 for BC/BCE
+	 * DAY_OF_WEEK: day of week of the given date, from 0 (Sunday) through 6 (Saturday)
+	 * DAY_OF_WEEK_IN_MONTH: the incidence of the day of week in the given month from 1 to 5
+	 * @private
+	 */
+	daysToCalendar : function(date) {
+		// calculate the y/m/d
+		// RD of the Gregorian Epoch (0001.01.01)
+		var epoch = 1, nyd, lastNyd, currentNyd, nextNyd, nydyear, rDays, priorDays, dayOfYear, quarter, week;
+		var cal = this;
+
+		// how many average years have passed? remember, we will be in the next year
+		year = Math.floor(date/cal.DAYS_IN_AVG_YEAR)+1;
+		// are we in the correct year? check that New Year Day for given year is not ahead
+		currentNyd = cal.calendarToDays(1,year,1,1);
+		nextNyd = currentNyd + cal.DAYS_IN_1_YEAR + 7*cal.isLeapYear(year);
+		lastNyd = currentNyd - (cal.DAYS_IN_1_YEAR + 7*cal.isLeapYear(year-1));
+		
+		if (currentNyd > date) {year--; nyd = lastNyd;}
+		else if (date >= nextNyd) {year++; nyd = nextNyd;}
+		else {nyd = currentNyd;}
+		
+		// how many days are left in this year?
+		dayOfYear = date-nyd;
+		priorDays = dayOfYear;
+
+		/*
+		 * c - months in complete cycle
+		 * l - number of longer months in that complete cycle
+		 * n - number of days we are into cycle
+		 * L - number of days in ordinary month
+		 * delta - offset from first position of first longer month
+		 * (12*dayOfYear + 12*30 + 4 - 1 +12 - (4*1mod12))/(12*30+4)
+		 * (12*dayOfYear+360+4-1+12-4)/361
+		 * (12*dayOfYear+372)/364
+		 */
+		month = Math.floor( (12*priorDays+372)/364 );
+
+		// day of the month = day of year - days in all previous months
+		var day = priorDays - ((month-1)*30 + Math.floor(month/3))+1;
+
+		var era = year <= 0 ? 0 : 1;
+		
+		var dow = dayOfYear%7;
+		var leap = cal.isLeapYear(year);
+	
+		var cal = {YEAR: year, MONTH: month, DATE: day, DAY_OF_YEAR: dayOfYear, LEAP: leap?1:0, ERA: era};
+		
+		return(cal);
+	}
+}

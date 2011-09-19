@@ -1,0 +1,14 @@
+{ 
+	"name": "jsorm-i18n", 
+	"description": "A JavaScript library for i18n: calendar conversions, timezones, i18n resource bundles, currency rendering",
+	"version": "@@version@@",
+	"url": "http://github.com/deitch/jsorm-i18n",
+	"author": "Avi Deitcher <avi@deitcher.net>",
+	"engines": ["node >= 0.3"],
+	"main": "./lib/jsorm-i18n.js", 
+	"test": "./test.js",
+	"repository": {
+		"type" : "git",
+		"url" : "http://github.com/deitch/jsorm-i18n.git"
+	}
+}

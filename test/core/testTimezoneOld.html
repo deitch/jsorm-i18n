@@ -1,0 +1,111 @@
+<html>
+ <head>
+  <title>Test Page for TimeZone.js Module</title>
+  <script language="javascript" src="../../../jsunit/app/jsUnitCore.js"></script>
+</head>
+ <body>
+ 	<script language="javascript" src="../../src/core/base.js"></script>
+ 	<script language="javascript" src="../../src/core/timezone.js"></script>
+	<script language="javascript">
+	// list of zones to test and test inputs and expected outputs
+	// each key is the name of a zone to load and check
+	// each value is an array of tests
+	// each test is itself an array whose keys are: [message,expected_value,time]
+	var zones = {
+				  "America/New_York":[["Midsummer 2004",'-14400:1:EDT',"2004,6,2,1,0,0"],["Midwinter 2004",'-18000:0:EST',"2004,1,2,1,0,0"],
+									  ["End of DST 1995",'-14400:1:EDT',"1995,9,28,1,59,59"],["Begin STD 1995",'-18000:0:EST',"1995,9,28,2,0,0"]],
+				  "Europe/London":[["Midsummer 2004",'3600:1:BST',"2004,6,2,1,0,0"],["Midwinter 2004",'0:0:GMT',"2004,1,2,1,0,0"],
+								   ["End of DST 1995",'3600:1:BST',"1995,9,21,1,59,59"],["Begin STD 1995",'0:0:GMT',"1995,9,21,2,0,0"]],
+				  "Asia/Jerusalem":[["Midsummer 2004",'10800:1:IDT',"2004,6,2,1,0,0"],["Midwinter 2004",'7200:0:IST',"2004,1,2,1,0,0"],
+									["End of STD 2000",'7200:0:IST',"2000,3,13,1,59,59"],["Begin DST 2000",'10800:1:IDT',"2000,3,13,2,0,0"]],
+				  "Asia/Tokyo":[["Midsummer 2004",'32400:0:JST',"2004,6,2,1,0,0"],["Midwinter 2004",'32400:0:JST',"2004,1,2,1,0,0"]]
+				};
+	// expected version and number of zones
+	var version = "2007k", numZones = 398;
+	// to hold our setUpPageStatus
+	var setUpPageCount, setUpPageRequired = 2;
+	var tzVersion = null, tzList = null, tzZones = {};
+	// what page are we calling from?
+	var inRunner = true;
+	function incrSetUpCount() {
+		setUpPageCount++;
+		if (setUpPageCount == setUpPageRequired)
+			setUpPageStatus = 'complete';		
+	}
+	// initial set up, following which we run the test
+	function setUpNative() {
+		inRunner = false;
+		setUpPage();
+	}
+	function setUpPage() {
+		inRunner = false;
+		setUpPageCount = 0;
+		jsorm.TimeZone.basepath =  inRunner ? '../../JavaScript/i18n/' : '../../';
+		jsorm.TimeZone.path = 'build/zoneinfo/';
+		jsorm.TimeZone.getVersion({callback: function(success,version,options) {
+			if (success)
+				tzVersion = version;
+			incrSetUpCount();
+		}});
+		
+		jsorm.TimeZone.getZoneList({callback: function(success,list,options) {
+			if (success)
+				tzList = list;
+			incrSetUpCount();
+		}});
+		
+		for (var i in zones) {
+			jsorm.TimeZone.getZone({name: i,callback: function(success,zone,options) {
+				if (success)
+					tzZones[zone.name] = zone;
+				incrSetUpCount();
+			}});
+		}
+		
+	}
+	</script>
+  <script language="javascript">
+	/*
+	 * Functions to test timezone functionality.
+	 * These are the tests we want to perform:
+	 * 1) Test known transition times in a few timezones.
+	 * 2) Test known sample times
+	 * 3) Test expected version
+	 * 4) Test list of zones length
+	 * 5) Test expected zones are there
+	 */
+	function testVersion() {
+		assertEquals("Version mismatch",version,tzVersion);
+	}
+	function testNumZones() {
+		var count=0;
+		for (var i in tzList.zones) {
+			count++;
+		}
+		assertEquals("Wrong number of zones",numZones,count);
+	}
+	function testZoneEntries() {
+		for (var i in zones) {
+			assertNotNull("Check zone in list",tzList.zones[i]);
+			assertNotNull("Check zone in zones",tzZones[i]);
+		}
+	}
+	function testTimes() {
+		var tz,info,name,infoStr,d,message,expect;
+		// check several during midsummer and midwinter
+		// New York
+		for (var i in zones) {
+			tz = tzZones[i];
+			for (var j in zones[i]) {
+				message = zones[i][j][0];
+				expect = zones[i][j][1];
+				d = zones[i][j][2].split(',');
+				info = tz.getZoneInfo(parseInt(d[0]),parseInt(d[1]),parseInt(d[2]),parseInt(d[3]),parseInt(d[4]),parseInt(d[5]));
+				infoStr = info.offset+':'+info.isDst+':'+info.abbr;
+				assertEquals(message+":"+i,expect,infoStr);
+			}
+		}
+	}
+  </script>
+ </body>
+</html>

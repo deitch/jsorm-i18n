@@ -1,0 +1,113 @@
+<html>
+	<head>
+		<title>jsorm i18n Test Application</title>
+		<script src="../../yui_3.0.0.pr2/build/yui/yui-min.js" type="text/javascript"></script> 
+		<script src="jsorm-i18n-src.js"></script>
+		<script src="test-core.js"></script>
+		<script src="test-calendar.js"></script>
+		<script src="test-currency.js"></script>
+		<script src="test-resourcebundle.js"></script>
+		<script src="test-timezone.js"></script>
+		
+		<!--  test-cal-impl has the test generating function for the specific calendar plugins -->
+		<script src="test-cal-impl.js"></script>
+		<!-- holder for calendar implementation tests -->
+		<script type="text/javascript">
+			var calImplTests = [];
+		</script>
+
+		<!--  the following actually perform tests for individual calendars -->
+		<script src="test-gregorian.js"></script>
+		<script src="test-julian.js"></script>
+		<script src="test-hebrew.js"></script>
+		<script src="test-islamic.js"></script>
+		<script src="test-sym454.js"></script>
+		<script src="test-sym010.js"></script>
+		<!-- end of actual tests for individual calendars -->
+		
+		<script type="text/javascript">
+			var tests = [
+				{name: 'Core (ALL)',fn: null},
+				{name: 'Calendar',fn: testCalendar},
+				{name: 'Currency',fn: testCurrency},
+				{name: 'Resource Bundle',fn: testResourceBundle},
+				{name: 'TimeZone',fn: testTimeZone},
+			];
+			function go(test) {
+				var local = true;
+				var conf = {
+					base: '../../yui_3.0.0.pr2/build/'
+				};
+				var f = function() {
+					return function(Y) {
+						var i, list;
+						if (test !== null) {
+							Y.Test.Runner.add(test(Y));							
+						} else {
+							for (i=0;i<tests.length;i++) {
+								if (tests[i].fn !== null) {
+									Y.Test.Runner.add(tests[i].fn(Y));																
+								}
+							}
+						}
+						Y.config.useBrowserConsole = true;
+						/*
+						var yconsole = new Y.Console({ 
+							boundingBox: '#basic',
+							newestOnTop: false                    
+						}).render('#log');	
+						*/
+						Y.Test.Runner.run();						
+					};
+				}();
+				YUI(local?conf:null).use("yuitest","console",f);
+				return(false);
+			}
+			function init() {
+				var li, a, ul;
+				// now set up the tests
+				ul = document.getElementById('testList');
+				for (var i in tests) {
+					if (tests.hasOwnProperty(i) && typeof(tests[i]) !== "function") {
+						li = document.createElement('li');
+						a = document.createElement('a');
+						ul.appendChild(li);
+						li.appendChild(a);
+						a.innerHTML = tests[i].name;
+						a.href = "#";
+						a.onclick = function(fn){
+							return function(){
+								return(go(fn));
+							}}(tests[i].fn);
+						ul.appendChild(li);						
+					}
+				}
+				for (var i in calImplTests) {
+					if (calImplTests.hasOwnProperty(i) && typeof(calImplTests[i]) !== "function") {
+						li = document.createElement('li');
+						a = document.createElement('a');
+						ul.appendChild(li);
+						li.appendChild(a);
+						a.innerHTML = calImplTests[i].name;
+						a.href = "#";
+						a.onclick = function(fn){
+							return function(){
+								return(go(fn));
+							}}(calImplTests[i].fn);
+						ul.appendChild(li);						
+					}
+				}
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<h1>jsorm i18n Test Application</h1>
+		<div id="tests">
+			<p>Pick a section to test</p>
+			<ul id="testList">
+			</ul>
+		</div>
+		<div id="results"></div>
+
+	</body>
+</html>

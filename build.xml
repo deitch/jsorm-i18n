@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!-- build file for write-store project -->
+<!-- Created by: Avi Deitcher &lt;avi@atomicinc.com&gt;  -->
+
+<project name="js-i18n" default="all" basedir=".">
+  <!-- name of the latest version of jsorm.i18n we are working with -->
+  <property name="zoneversion" value="2009u"/>
+  <!-- name of the latest version of i18n we are working with -->
+  <property name="version" value="1.4"/>
+
+
+  <property file="build.properties"/>
+  <property name="src" value="./src"/>
+  <property name="core" value="${src}/core"/>
+  <property name="calendars" value="${src}/calendars"/>
+  <property name="locale" value="${src}/locale"/>
+  <property name="build" value="./build"/>
+  <property name="test" value="./test"/>
+  <property name="samples" value="./samples"/>
+  <property name="caldest" value="${build}/calendars"/>
+  <property name="localedest" value="${build}/locale"/>
+  <property name="dist" value="./dist"/>
+  <property name="compile.debug" value="true"/>
+  <property name="basefile" value="jsorm-i18n"/>
+  <property name="expfile" value="${basefile}-src.js"/>
+  <property name="minfile" value="${basefile}.js"/>
+  <property name="distfile-all" value="${dist}/${basefile}-${version}.zip"/>
+  <property name="distfile-zoneinfo" value="${dist}/${basefile}-zoneinfo-${zoneversion}.zip"/>
+  <property name="distfile-base" value="${dist}/${basefile}-${version}-base.zip"/>
+  <property name="srcfiles" value="00base.js,resource-bundle.js,currency.js,timezone.js,calendar.js,json2.js"/>
+  <property name="zonebuild" value="${build}/zoneinfo"/>
+  <property name="zoneinfo" value="./zoneinfo"/>
+  <property name="zonecompiler" value="${src}/zoneinfo/compile_zoneinfo.rb"/>
+  <property name="zonevalidater" value="${src}/zoneinfo/process_binary_zi.rb"/>
+  <property name="privatedoc" value="${src}/doc/private"/>
+  <property name="doc" value="${build}/doc"/>
+  <property name="jsdochome" value="/Users/adeitcher/Documents/Development/JavaScript/jsdoc_toolkit-1.4.0mod"/>
+  <property name="jsdoc" value="${jsdochome}/jsdoc"/>
+  <property name="testhtml" value="test/test.html"/>
+  <property name="jsorm-base" value="../jsormutil/dist/jsorm-1.0-min-nolicense.js"/>
+
+
+<taskdef name="jsmin"
+        classname="net.matthaynes.jsmin.JSMin_Task"
+        classpath="/Library/Java/lib/jsmin.0.2.2a.jar"/>
+
+<taskdef name="jslint"
+             classname="net.happygiraffe.jslint.ant.JSLintTask"
+             classpath="/Library/Java/lib/jslint4java-1.2.1.jar" />
+
+	<target name="core" depends="init">
+		<!-- combine the files into build/ and minify -->
+		<concat destfile="${build}/${expfile}">
+			<fileset file="${src}/00license.js"/>
+			<fileset file="${core}/000pre.js"/>
+			<fileset file="${jsorm-base}"/>
+			<filelist dir="${core}" files="${srcfiles}"/>
+			<fileset file="${core}/000post.js"/>
+		</concat>
+		
+		<jsmin destdir="${build}" srcfile="${build}/${expfile}" destfile="tmp-minfile.js">
+		</jsmin>
+		<!-- Make sure minified file includes the license -->
+		<concat destfile="${build}/${minfile}">
+			<fileset file="${src}/00license.js"/>
+			<fileset file="${build}/tmp-minfile.js"/>
+		</concat>
+		<!-- eliminate the temporary minfile -->
+		<delete file="${build}/tmp-minfile.js"/>
+
+		<!-- put the version number in the files -->
+		<replace file="${build}/${minfile}" token="@@version@@" value="${version}"/>		
+		<replace file="${build}/${expfile}" token="@@version@@" value="${version}"/>		
+
+		<!-- Include the built file in the test directory -->
+		<copy todir="${test}" verbose="true">
+		    <fileset dir="${build}" includes="${minfile},${expfile}"/>
+		</copy>		
+		<!-- Include the built file in the samples directory -->
+		<copy todir="${samples}" verbose="true">
+		    <fileset dir="${build}" includes="${minfile},${expfile}"/>
+		</copy>		
+	</target>
+	
+	<target name="calendars" depends="init">
+		<!-- minify the files into build/ -->
+		<jsmin destdir="${caldest}">
+			<fileset dir="${calendars}" includes="*.json"/>
+		</jsmin>		
+		<!-- Include the gregorian calendar file in the samples directory -->
+		<copy todir="${samples}" verbose="true">
+		    <fileset dir="${build}" includes="calendars/*.json"/>
+		</copy>		
+	</target>
+	
+    <target name="build" depends="core,calendars,doc">
+    </target>
+
+	<target name="test">
+		 <jslint>
+		   <formatter type="plain" /> 
+		   <fileset dir="${src}" includes="**/*.js **/*.json" />
+		 </jslint>
+		<!--
+		<exec executable="${BROWSER}" spawn="yes">
+			<arg line="${BROWSER_ARG_OSX}" />
+			<arg line="${testhtml}" />
+		</exec>
+		* -->
+	</target>
+
+	<!-- Separate task so we can run the zip without rebuilding -->
+	<target name="zip">
+		<!-- zip together the relevant files build/, README.txt -->
+		<zip destfile="${distfile-all}">
+			<fileset dir="${build}"/>
+		</zip>
+		<zip destfile="${distfile-zoneinfo}">
+			<fileset dir="${build}" includes="zoneinfo/**"/>
+		</zip>
+		<zip destfile="${distfile-base}">
+			<fileset dir="${build}" excludes="zoneinfo/"/>
+		</zip>
+	</target>
+
+	<target name="dist" depends="build,zoneinfo,locale,doc,zip">
+	</target>
+
+	<target name="privatedoc">
+		<exec executable="${jsdoc}">
+			<env key="JSDOCDIR" value="${jsdochome}"/>
+			<env key="JSDOCTEMPLATEDIR" value="${jsdochome}"/>
+			<arg value="-d=${privatedoc}"/>
+			<arg value="-t=sunny"/>
+			<arg value="-p"/>
+			<arg value="-r=4"/>
+			<arg value="${core}"/>
+			<arg value="${calendars}"/>
+		</exec>
+	</target>
+
+	<target name="doc">
+		<copy todir="${build}">
+		    <fileset dir="." includes="README.txt"/>
+		</copy>		
+		<exec executable="${jsdoc}">
+			<env key="JSDOCDIR" value="${jsdochome}"/>
+			<env key="JSDOCTEMPLATEDIR" value="${jsdochome}"/>
+			<arg value="-d=${privatedoc}"/>
+			<arg value="-t=sunny"/>
+			<arg value="-d=${doc}"/>
+			<arg value="-r=4"/>
+			<arg value="${core}"/>
+			<arg value="${calendars}"/>
+		</exec>
+	</target>
+
+	<target name="alldoc" depends="doc,privatedoc">
+	</target>
+
+	<target name="locale" depends="init">
+		<copy todir="${localedest}">
+		    <fileset dir="${locale}"/>
+		  </copy>		
+	</target>
+
+	<target name="zoneinfo" depends="init">
+		<exec executable="${zonecompiler}">
+			<env key="RUBYLIB" path="${src}/zoneinfo"/>
+			<arg value="${zoneinfo}/${zoneversion}"/>
+			<arg value="${zonebuild}"/>
+		</exec>
+		<!-- include the built files in the sample directory -->
+		<copy todir="${samples}" verbose="true">
+		    <fileset dir="${build}" includes="zoneinfo/**"/>
+		</copy>		
+	</target>
+	
+	<target name="validatezoneinfo" depends="zoneinfo,nativezoneinfo">
+		<exec executable="${zonevalidater}">
+			<env key="RUBYLIB" path="${src}/zoneinfo"/>
+			<arg value="${zonebuild}"/>
+			<arg value="${zoneinfo}/${zoneversion}/build/etc/zoneinfo"/>
+			<arg value="./test/zoneinfo/out"/>
+		</exec>
+	</target>
+
+	<target name="nativezoneinfo" depends="">
+		<mkdir dir="${zoneinfo}/${zoneversion}/build"/>
+		<exec executable="make" dir="${zoneinfo}/${zoneversion}/src">
+			<arg value="TOPDIR=../../../${zoneinfo}/${zoneversion}/build"/>
+			<arg value="CC=gcc"/>
+			<arg value="CFLAGS=-DSTD_INSPIRED"/>
+			<arg value="install"/>
+		</exec>
+	</target>
+
+ 	<target name="all" depends="dist">
+	</target>
+
+	<target name="cleandist" depends="clean,dist">
+	</target>
+	
+	
+<!--
+init is a target that sets things up for the build.  Since we use the
+built-in ant function mkdir, it will only make the directory if it
+does not already exist.
+-->
+  <target name="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${zonebuild}"/>
+	<mkdir dir="${caldest}"/>
+	<mkdir dir="${dist}"/>
+  </target>
+
+
+<!--
+Always include a clean target to get rid of all the extra files
+created by the build process, so you can save storage safely, without
+thinking.  Also: sometimes you'll want to do a completely fresh build,
+such as when changing to a new version of the JDK.
+-->
+  <target name="clean" description="Removes previous build">
+    <delete verbose="true" dir="${build}"/>
+    <delete verbose="true" dir="${privatedoc}"/>
+    <delete verbose="true" dir="${zonebuild}"/>
+    <delete verbose="true" dir="${dist}"/>
+  </target>
+
+</project>
+

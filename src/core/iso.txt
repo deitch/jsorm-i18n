@@ -1,0 +1,33 @@
+Where does ISO change things?
+
+- getMax('WEEK_OF_YEAR') // ISO DOES change this
+- getMin('WEEK_OF_YEAR') // 0 for most years, 1 for ISO
+- processTime(): 
+	cal.WEEK_OF_YEAR = processWeekCount(...);  // ISO DOES change this
+- processIsoWeekCount(), which we are trying to get rid of
+
+Where else is processWeekCount called that might be impacted?
+- getMax('WEEK_OF_MONTH')
+- processTime(): cal.WEEK_OF_MONTH = ...
+- _recalculateWeeks(), which is called by: setFirstDayOfWeek(), setMinimumDaysInWeek() // ISO does not change this (sort of)
+
+
+How does ISO work?
+1) It goes through the usual "WEEK_OF_YEAR" calculation, based on the year, minDays fixed at 4, firstDay fixed at MONDAY, etc.
+2a) If the WEEK_OF_YEAR comes out to be 0, then YEAR--, and the WEEK_OF_YEAR is either 52 or 53
+2b) If the WEEK_OF_YEAR comes out to be 53 and certain day of week conditions are met, then YEAR++ and WEEK_OF_YEAR is 1
+Essentially, ISO wants the change to possibly modify the WEEK_OF_YEAR and YEAR. Note that it does this only for WEEK_OF_YEAR,
+not WEEK_OF_MONTH. 
+
+In other words, calendars other than ISO can just rely on the regular WEEK_OF_MONTH or WEEK_OF_YEAR calculation. Just the 
+ISO one is different. 
+
+How do we separate it? Options:
+A- Calendar implementation may have a callback for weekOfMonth and weekOfYear. When does it get called? This is quite messy
+B- Calendar implementation can set WOM and/or WOY. Calendar only sets it if it is blank on return. Challenge: how to handle getMax() and setFirst*/setMinimum*
+C- Calendar implementation does its own processWeekCount to set WOM and WOY. However, this seems silly and redundant, since every
+calendar except ISO does it the same.
+
+In the end, all of these choices have too many shortcomings. So what we will do:
+Any calendar implementation can add additional fields that are not part of the standard set. These can be retrieved with a regular
+get() function, even though there are no convenience functions in Calendar().

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+	<head>
+		<title>Calendar Converter</title>
+		<script type="text/javascript" src="jsorm-i18n-src.js"></script>
+		<script type="text/javascript">
+		var gYear, gMonth, gDate, sYear, sMonth, sDate, gCal, sCal, rd;
+		var cals = [
+			{name: 'Gregorian', calendar: "gregorian", instance: null, use:true},
+			{name: 'Hebrew', calendar: "hebrew", instance: null, use:true},
+			{name: 'Islamic', calendar: "islamic", instance: null, use:true},
+			{name: 'Julian', calendar: "julian", instance: null, use:true},
+			{name: 'Symmetry454', calendar: "sym454", instance: null, use:true},
+			{name: 'Symmetry010', calendar: "sym010", instance: null, use:true}
+		];
+		function load() {
+			var div, span, form, table, tr, th, td, input, select, option, i, j, months, monthNames, current, calsCount = 0, calsDone = 0;
+			var mainDiv = document.getElementById('sample');
+			for (i in cals) {
+				if (cals.hasOwnProperty(i) && typeof(cals[i]) !== "function" && cals[i].use) {
+					current = cals[i];
+					div = document.createElement('div');
+					div.className = "calType";
+					div.id = current.calendar;
+					mainDiv.appendChild(div);
+					// header
+					span = document.createElement('span');
+					span.className = "calName";
+					span.appendChild(document.createTextNode(current.name));
+					div.appendChild(span);
+					form = document.createElement('form');
+					div.appendChild(form);
+					table = document.createElement('table');
+					
+					// table to hold the data
+					form.appendChild(table);
+					
+					// header row with three headers
+					tr = document.createElement('tr');
+					tr.className = "calHeaderRow";
+					table.appendChild(tr);
+					th = document.createElement('td');
+					th.innerHTML = "Year";
+					tr.appendChild(th);
+					th = document.createElement('td');
+					th.innerHTML = "Month";
+					tr.appendChild(th);
+					th = document.createElement('td');
+					th.innerHTML = "Date";
+					tr.appendChild(th);
+					
+					// data row
+					tr = document.createElement('tr');
+					table.appendChild(tr);
+					
+					// year entry
+					td = document.createElement('td');
+					tr.appendChild(td);
+					input = document.createElement('input');
+					td.appendChild(input);
+					input.id = current.calendar+"Year";
+					input.type = "text";
+					input.size = "5";
+					input.onchange = function(cal){
+						return function(){
+							doFrom(cal);
+						}
+					}(current);	
+					current.year = input;
+					
+					// month entry
+					td = document.createElement('td');
+					tr.appendChild(td);
+					select = document.createElement('select');
+					td.appendChild(select);
+					select.id = current.calendar+"Month";
+					select.onchange = function(cal){
+						return function(){
+							doFrom(cal);
+						}
+					}(current);	
+					current.month = select;
+					
+					// date entry
+					td = document.createElement('td');
+					tr.appendChild(td);
+					input = document.createElement('input');
+					td.appendChild(input);
+					input.id = current.calendar+"Date";
+					input.type = "text";
+					input.size = "5";
+					input.onchange = function(cal){
+						return function(){
+							doFrom(cal);
+						}
+					}(current);	
+					current.date = input;				
+				}
+			}
+						
+			
+			// set the initial time to be right now
+			var date = new Date();
+
+			// make sure we are using only the local path
+			JSORM.TimeZone.basepath = './';
+			JSORM.TimeZone.path = 'zoneinfo/';
+			
+			// defaults for loading Calendars
+			JSORM.calendar.basePath = './';
+			JSORM.calendar.calendarPath = 'calendars/';
+
+			// this is how we load a new zone and then initialize the calendar
+			var defZone = 'America/Montreal';
+			var finishSetup = function() {
+				if (calsDone == calsCount) {doSetOutput(date.getTime());}
+			}
+			for (i in cals) {
+				if (cals.hasOwnProperty(i) && typeof(cals[i]) !== "function" && cals[i].use) {
+					// keep track of how many we load
+					calsCount++;
+					config = {calendar: cals[i].calendar, zone: defZone, locale: "en_US", date: date, callback: function(c){
+						return function(success,obj,opts) {
+							c.instance = obj;
+							// set up the months
+							select = c.month;
+							for (j=0;j<12;j++) {
+								option = document.createElement('option');
+								select.appendChild(option);
+								option.value = j+1;
+								option.innerHTML = obj.getTextMonthLong(j+1);
+							}
+							// what about a 13th month that some calendars have?
+							
+							var undecimber = obj.getTextMonthLong(13);
+							if (undecimber) {
+								option = document.createElement('option');
+								select.appendChild(option);
+								option.value = 13;
+								option.innerHTML = undecimber;								
+							}
+							calsDone++;
+							finishSetup();
+						}
+					}(cals[i])};			
+					JSORM.calendar.getCalendar(config);
+				}
+			}
+		}
+		function doSetOutput(time) {
+			var c, i;
+			for (i in cals) {
+				if (cals.hasOwnProperty(i) && typeof(cals[i]) !== "function" && cals[i].use) {
+					c = cals[i];
+					c.instance.setTime(time);
+					c.year.value = c.instance.getYear();
+					c.month.value = c.instance.getMonth();
+					c.date.value = c.instance.getDate();
+				}
+			}
+		}
+		function doFrom(src) {
+			src.instance.setYear(parseInt(src.year.value));
+			src.instance.setMonth(parseInt(src.month.value));
+			src.instance.setDate(parseInt(src.date.value));
+			
+			doSetOutput(src.instance.getTime());			
+		}
+		</script>
+		<style>
+			.calType {
+				border: 1px solid #000000;
+				float: left;
+				margin: 5px;
+				padding: 5px;
+			}
+			.calHeaderRow {
+				
+			}
+			.calName {
+				
+			}
+		</style>
+	</head>
+	<body onload="load()">
+		<div id="sample">
+			<div id="instructions">
+				<h2>Instructions</h2>
+			Below are multiple calendars. You can change the year, month or date in any calendar, and the other ones will be updated appropriately.
+			 <br/>
+			</div>
+		</div>
+	</body>
+</html>

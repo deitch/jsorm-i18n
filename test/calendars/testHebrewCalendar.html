@@ -1,0 +1,485 @@
+<html>
+ <head>
+  <title>Test Page for HebrewCalendar.js Module</title>
+  <script language="javascript" src="../../../jsunit/app/jsUnitCore.js"></script>
+</head>
+ <body>
+ 	<script language="javascript" src="../../src/core/base.js"></script>
+ 	<script language="javascript" src="../../src/core/calendar.js"></script>
+ 	<script language="javascript" src="../../src/calendars/hebrew.json"></script>
+	<script language="javascript">
+	// test bundles: [rd,m,y,d,dow]
+	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
+	//  day of year, week of month, week of year calculated by genRefDates.java
+	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
+	var refDates = [
+		[-214193, 3174, 5, 10],
+		[-61387, 3593, 9, 25],
+		[25469, 3831, 7, 3],
+		[49217, 3896, 7, 9],
+		[171307, 4230, 10, 18],
+		[210155, 4336, 3, 4],
+		[253427, 4455, 8, 13],
+		[369740, 4773, 2, 6],
+		[400085, 4856, 2, 23],
+		[434355, 4950, 1, 7],
+		[452605, 5000, 13, 8],
+		[470160, 5048, 1, 21],
+		[473837, 5058, 2, 7],
+		[507850, 5151, 4, 1],
+		[524156, 5196, 11, 7],
+		[544676, 5252, 1, 3],
+		[567118, 5314, 7, 1],
+		[569477, 5320, 12, 27],
+		[601716, 5408, 3, 20],
+		[613424, 5440, 4, 3],
+		[626596, 5476, 5, 5],
+		[645554, 5528, 4, 4],
+		[664224, 5579, 5, 11],
+		[671401, 5599, 1, 12],
+		[694799, 5663, 1, 22],
+		[704424, 5689, 5, 19],
+		[708842, 5702, 7, 8],
+		[709409, 5703, 1, 14],
+		[709580, 5704, 7, 8],
+		[727274, 5752, 13, 12],
+		[728714, 5756, 12, 5],
+		[744313, 5799, 8, 12],
+		[764652, 5854, 5, 5]
+	];
+	
+	var refYears = [
+		{year: 5700, leap: true, days: 385},
+		{year: 5701, leap: false, days: 354},
+		{year: 5702, leap: false, days: 355},
+		{year: 5703, leap: true, days: 383},
+		{year: 5704, leap: false, days: 354},
+		{year: 5705, leap: false, days: 355},
+		{year: 5706, leap: true, days: 383},
+		{year: 5707, leap: false, days: 354},
+		{year: 5708, leap: true, days: 385},
+		{year: 5709, leap: false, days: 355},
+		{year: 5710, leap: false, days: 353},
+		{year: 5711, leap: true, days: 384},
+		{year: 5712, leap: false, days: 355},
+		{year: 5713, leap: false, days: 355},
+		{year: 5714, leap: true, days: 383},
+		{year: 5715, leap: false, days: 354},
+		{year: 5716, leap: false, days: 355},
+		{year: 5717, leap: true, days: 385},
+		{year: 5718, leap: false, days: 354},
+		{year: 5719, leap: true, days: 383},
+		{year: 5720, leap: false, days: 355},
+		{year: 5721, leap: false, days: 354},
+		{year: 5722, leap: true, days: 383},
+		{year: 5723, leap: false, days: 355},
+		{year: 5724, leap: false, days: 354},
+		{year: 5725, leap: true, days: 385},
+		{year: 5726, leap: false, days: 353},
+		{year: 5727, leap: true, days: 385},
+		{year: 5728, leap: false, days: 354},
+		{year: 5729, leap: false, days: 355},
+		{year: 5730, leap: true, days: 383},
+		{year: 5731, leap: false, days: 354},
+		{year: 5732, leap: false, days: 355},
+		{year: 5733, leap: true, days: 383},
+		{year: 5734, leap: false, days: 355},
+		{year: 5735, leap: false, days: 354},
+		{year: 5736, leap: true, days: 385},
+		{year: 5737, leap: false, days: 353},
+		{year: 5738, leap: true, days: 384},
+		{year: 5739, leap: false, days: 355},
+		{year: 5740, leap: false, days: 355},
+		{year: 5741, leap: true, days: 383},
+		{year: 5742, leap: false, days: 354},
+		{year: 5743, leap: false, days: 355},
+		{year: 5744, leap: true, days: 385},
+		{year: 5745, leap: false, days: 354},
+		{year: 5746, leap: true, days: 383},
+		{year: 5747, leap: false, days: 355},
+		{year: 5748, leap: false, days: 354},
+		{year: 5749, leap: true, days: 383},
+		{year: 5750, leap: false, days: 355},
+		{year: 5751, leap: false, days: 354},
+		{year: 5752, leap: true, days: 385},
+		{year: 5753, leap: false, days: 353},
+		{year: 5754, leap: false, days: 355},
+		{year: 5755, leap: true, days: 384},
+		{year: 5756, leap: false, days: 355},
+		{year: 5757, leap: true, days: 383},
+		{year: 5758, leap: false, days: 354},
+		{year: 5759, leap: false, days: 355},
+		{year: 5760, leap: true, days: 385},
+		{year: 5761, leap: false, days: 353},
+		{year: 5762, leap: false, days: 354},
+		{year: 5763, leap: true, days: 385},
+		{year: 5764, leap: false, days: 355},
+		{year: 5765, leap: true, days: 383},
+		{year: 5766, leap: false, days: 354},
+		{year: 5767, leap: false, days: 355},
+		{year: 5768, leap: true, days: 383},
+		{year: 5769, leap: false, days: 354},
+		{year: 5770, leap: false, days: 355},
+		{year: 5771, leap: true, days: 385},
+		{year: 5772, leap: false, days: 354},
+		{year: 5773, leap: false, days: 353},
+		{year: 5774, leap: true, days: 385},
+		{year: 5775, leap: false, days: 354},
+		{year: 5776, leap: true, days: 385},
+		{year: 5777, leap: false, days: 353},
+		{year: 5778, leap: false, days: 354},
+		{year: 5779, leap: true, days: 385},
+		{year: 5780, leap: false, days: 355},
+		{year: 5781, leap: false, days: 353},
+		{year: 5782, leap: true, days: 384},
+		{year: 5783, leap: false, days: 355},
+		{year: 5784, leap: true, days: 383},
+		{year: 5785, leap: false, days: 355},
+		{year: 5786, leap: false, days: 354},
+		{year: 5787, leap: true, days: 385},
+		{year: 5788, leap: false, days: 355},
+		{year: 5789, leap: false, days: 354},
+		{year: 5790, leap: true, days: 383},
+		{year: 5791, leap: false, days: 355},
+		{year: 5792, leap: false, days: 354},
+		{year: 5793, leap: true, days: 383},
+		{year: 5794, leap: false, days: 355},
+		{year: 5795, leap: true, days: 385},
+		{year: 5796, leap: false, days: 354},
+		{year: 5797, leap: false, days: 353},
+		{year: 5798, leap: true, days: 385},
+		{year: 5799, leap: false, days: 354},
+		{year: 5800, leap: false, days: 355},
+		{year: 5801, leap: true, days: 383},
+		{year: 5802, leap: false, days: 354},
+		{year: 5803, leap: true, days: 385},
+		{year: 5804, leap: false, days: 353},
+		{year: 5805, leap: false, days: 355},
+		{year: 5806, leap: true, days: 384},
+		{year: 5807, leap: false, days: 355},
+		{year: 5808, leap: false, days: 353},
+		{year: 5809, leap: true, days: 384},
+		{year: 5810, leap: false, days: 355},
+		{year: 5811, leap: false, days: 355},
+		{year: 5812, leap: true, days: 383},
+		{year: 5813, leap: false, days: 354},
+		{year: 5814, leap: true, days: 385},
+		{year: 5815, leap: false, days: 355},
+		{year: 5816, leap: false, days: 354},
+		{year: 5817, leap: true, days: 383},
+		{year: 5818, leap: false, days: 355},
+		{year: 5819, leap: false, days: 354},
+		{year: 5820, leap: true, days: 383},
+		{year: 5821, leap: false, days: 355},
+		{year: 5822, leap: true, days: 385},
+		{year: 5823, leap: false, days: 354},
+		{year: 5824, leap: false, days: 353},
+		{year: 5825, leap: true, days: 385},
+		{year: 5826, leap: false, days: 354},
+		{year: 5827, leap: false, days: 355},
+		{year: 5828, leap: true, days: 383},
+		{year: 5829, leap: false, days: 354},
+		{year: 5830, leap: false, days: 355},
+		{year: 5831, leap: true, days: 383},
+		{year: 5832, leap: false, days: 355},
+		{year: 5833, leap: true, days: 384},
+		{year: 5834, leap: false, days: 355},
+		{year: 5835, leap: false, days: 353},
+		{year: 5836, leap: true, days: 384},
+		{year: 5837, leap: false, days: 355},
+		{year: 5838, leap: false, days: 355},
+		{year: 5839, leap: true, days: 383},
+		{year: 5840, leap: false, days: 354},
+		{year: 5841, leap: true, days: 385},
+		{year: 5842, leap: false, days: 355},
+		{year: 5843, leap: false, days: 354},
+		{year: 5844, leap: true, days: 383},
+		{year: 5845, leap: false, days: 355},
+		{year: 5846, leap: false, days: 354},
+		{year: 5847, leap: true, days: 383},
+		{year: 5848, leap: false, days: 355},
+		{year: 5849, leap: false, days: 354},
+		{year: 5850, leap: true, days: 385},
+		{year: 5851, leap: false, days: 353},
+		{year: 5852, leap: true, days: 385},
+		{year: 5853, leap: false, days: 354},
+		{year: 5854, leap: false, days: 355},
+		{year: 5855, leap: true, days: 383},
+		{year: 5856, leap: false, days: 354},
+		{year: 5857, leap: false, days: 355},
+		{year: 5858, leap: true, days: 385},
+		{year: 5859, leap: false, days: 353},
+		{year: 5860, leap: true, days: 384},
+		{year: 5861, leap: false, days: 355},
+		{year: 5862, leap: false, days: 355},
+		{year: 5863, leap: true, days: 383},
+		{year: 5864, leap: false, days: 354},
+		{year: 5865, leap: false, days: 355},
+		{year: 5866, leap: true, days: 385},
+		{year: 5867, leap: false, days: 354},
+		{year: 5868, leap: false, days: 353},
+		{year: 5869, leap: true, days: 385},
+		{year: 5870, leap: false, days: 354},
+		{year: 5871, leap: true, days: 383},
+		{year: 5872, leap: false, days: 355},
+		{year: 5873, leap: false, days: 354},
+		{year: 5874, leap: true, days: 385},
+		{year: 5875, leap: false, days: 353},
+		{year: 5876, leap: false, days: 354},
+		{year: 5877, leap: true, days: 385},
+		{year: 5878, leap: false, days: 355},
+		{year: 5879, leap: true, days: 383},
+		{year: 5880, leap: false, days: 354},
+		{year: 5881, leap: false, days: 355},
+		{year: 5882, leap: true, days: 383},
+		{year: 5883, leap: false, days: 355},
+		{year: 5884, leap: false, days: 354},
+		{year: 5885, leap: true, days: 385},
+		{year: 5886, leap: false, days: 355},
+		{year: 5887, leap: false, days: 354},
+		{year: 5888, leap: true, days: 383},
+		{year: 5889, leap: false, days: 355},
+		{year: 5890, leap: true, days: 383},
+		{year: 5891, leap: false, days: 354},
+		{year: 5892, leap: false, days: 355},
+		{year: 5893, leap: true, days: 385},
+		{year: 5894, leap: false, days: 354},
+		{year: 5895, leap: false, days: 353},
+		{year: 5896, leap: true, days: 385},
+		{year: 5897, leap: false, days: 354},
+		{year: 5898, leap: true, days: 383},
+		{year: 5899, leap: false, days: 355},
+		{year: 5900, leap: false, days: 354},
+		{year: 5901, leap: true, days: 385},
+		{year: 5902, leap: false, days: 353},
+		{year: 5903, leap: false, days: 355},
+		{year: 5904, leap: true, days: 384},
+		{year: 5905, leap: false, days: 355},
+		{year: 5906, leap: false, days: 353},
+		{year: 5907, leap: true, days: 384},
+		{year: 5908, leap: false, days: 355},
+		{year: 5909, leap: true, days: 383},
+		{year: 5910, leap: false, days: 355},
+		{year: 5911, leap: false, days: 354},
+		{year: 5912, leap: true, days: 385},
+		{year: 5913, leap: false, days: 355},
+		{year: 5914, leap: false, days: 354},
+		{year: 5915, leap: true, days: 383},
+		{year: 5916, leap: false, days: 355},
+		{year: 5917, leap: true, days: 383},
+		{year: 5918, leap: false, days: 354},
+		{year: 5919, leap: false, days: 355},
+		{year: 5920, leap: true, days: 385},
+		{year: 5921, leap: false, days: 354},
+		{year: 5922, leap: false, days: 353},
+		{year: 5923, leap: true, days: 385},
+		{year: 5924, leap: false, days: 354},
+		{year: 5925, leap: false, days: 355},
+		{year: 5926, leap: true, days: 383},
+		{year: 5927, leap: false, days: 354},
+		{year: 5928, leap: true, days: 385},
+		{year: 5929, leap: false, days: 353},
+		{year: 5930, leap: false, days: 355},
+		{year: 5931, leap: true, days: 384},
+		{year: 5932, leap: false, days: 355},
+		{year: 5933, leap: false, days: 353},
+		{year: 5934, leap: true, days: 384},
+		{year: 5935, leap: false, days: 355},
+		{year: 5936, leap: true, days: 385},
+		{year: 5937, leap: false, days: 353},
+		{year: 5938, leap: false, days: 354},
+		{year: 5939, leap: true, days: 385},
+		{year: 5940, leap: false, days: 355},
+		{year: 5941, leap: false, days: 354},
+		{year: 5942, leap: true, days: 383},
+		{year: 5943, leap: false, days: 355},
+		{year: 5944, leap: false, days: 354},
+		{year: 5945, leap: true, days: 385},
+		{year: 5946, leap: false, days: 353},
+		{year: 5947, leap: true, days: 385},
+		{year: 5948, leap: false, days: 354},
+		{year: 5949, leap: false, days: 355},
+		{year: 5950, leap: true, days: 383},
+		{year: 5951, leap: false, days: 354},
+		{year: 5952, leap: false, days: 355},
+		{year: 5953, leap: true, days: 383},
+		{year: 5954, leap: false, days: 354},
+		{year: 5955, leap: true, days: 385},
+		{year: 5956, leap: false, days: 355},
+		{year: 5957, leap: false, days: 353},
+		{year: 5958, leap: true, days: 384},
+		{year: 5959, leap: false, days: 355},
+		{year: 5960, leap: false, days: 355},
+		{year: 5961, leap: true, days: 383},
+		{year: 5962, leap: false, days: 354},
+		{year: 5963, leap: false, days: 355},
+		{year: 5964, leap: true, days: 385},
+		{year: 5965, leap: false, days: 354},
+		{year: 5966, leap: true, days: 383},
+		{year: 5967, leap: false, days: 355},
+		{year: 5968, leap: false, days: 354},
+		{year: 5969, leap: true, days: 383},
+		{year: 5970, leap: false, days: 355},
+		{year: 5971, leap: false, days: 354},
+		{year: 5972, leap: true, days: 385},
+		{year: 5973, leap: false, days: 353},
+		{year: 5974, leap: true, days: 385},
+		{year: 5975, leap: false, days: 354},
+		{year: 5976, leap: false, days: 355},
+		{year: 5977, leap: true, days: 383},
+		{year: 5978, leap: false, days: 354},
+		{year: 5979, leap: false, days: 355},
+		{year: 5980, leap: true, days: 383},
+		{year: 5981, leap: false, days: 355},
+		{year: 5982, leap: false, days: 354},
+		{year: 5983, leap: true, days: 385},
+		{year: 5984, leap: false, days: 353},
+		{year: 5985, leap: true, days: 384},
+		{year: 5986, leap: false, days: 355},
+		{year: 5987, leap: false, days: 355},
+		{year: 5988, leap: true, days: 383},
+		{year: 5989, leap: false, days: 354},
+		{year: 5990, leap: false, days: 355},
+		{year: 5991, leap: true, days: 385},
+		{year: 5992, leap: false, days: 354},
+		{year: 5993, leap: true, days: 383},
+		{year: 5994, leap: false, days: 355},
+		{year: 5995, leap: false, days: 354},
+		{year: 5996, leap: true, days: 383},
+		{year: 5997, leap: false, days: 355},
+		{year: 5998, leap: false, days: 354},
+		{year: 5999, leap: true, days: 385},
+		{year: 6000, leap: false, days: 353}
+	];
+	
+	// to hold our setUpPageStatus
+	var inRunner = true;
+	var cal;
+	function mod(x,y) {return ( x - y*(Math.floor(x/y)));};
+
+	// initial set up, following which we run the test
+	function setUpNative() {
+		inRunner = false;
+		setUpPage();
+	}
+	function setUpPage() {
+		// when running in a Web browser, it does this intelligently
+		inRunner = false;
+		var bp = inRunner ? '../../JavaScript/i18n/' : '../../';
+		jsorm.i18n_ajax(bp + "src/calendars/hebrew.json",function(url,xmlHttp,success,options) {
+			if (success) {
+				// we have it loaded
+				cal = function() {return eval("("+xmlHttp.responseText+")");}(); 
+			}
+			setUpPageStatus = 'complete';					
+		});
+	}
+	/*
+	 * Functions to test gregorian calendar functionality.
+	 * These are the tests we want to perform:
+	 * 1) maximum month for several years *
+	 * 2) maximum days in several months for several years *
+	 * 3) isLeapYear for several years *
+	 * 4) daysToCalendar for several RD days *
+	 * 5) calendarToDays for several dates *
+	 * 6) processWeekCount - for several dates *
+	 * 7) processIsoWeekCount - for several dates *
+	 * 8) processTime - convert several times in different zones to the calendar equivalents *
+	 * 9) processFields - convert fields to time for different dates and zones *
+	 */
+	function testMaxMonths() {
+		var max = null, expect = null;
+		for (var i=0;i<refYears.length;i++) {
+			max = cal.getMaxMonth(0,refYears[i].year);
+			expect = refYears[i].leap ? 13 : 12;
+			assertEquals("Maximum month for "+refYears[i].year,expect,max);
+		}
+	}
+	function testMaxYearDay() {
+		var max = null, expect = null;
+		for (var i=0;i<refYears.length;i++) {
+			max = cal.getMaxDayOfYear(0,refYears[i].year);
+			expect = refYears[i].days;
+			assertEquals("Maximum days in year for "+refYears[i].year,expect,max);
+		}
+	}
+	function testMaxDays() {
+		var dates = [
+		{year:5768,month:1,expect:30},
+		{year:5768,month:2,expect:29},
+		{year:5768,month:3,expect:30},
+		{year:5768,month:4,expect:29},
+		{year:5768,month:5,expect:30},
+		{year:5768,month:6,expect:29},
+		{year:5768,month:7,expect:30},
+		{year:5768,month:8,expect:29},
+		{year:5768,month:9,expect:29},
+		{year:5768,month:10,expect:29},
+		{year:5768,month:11,expect:30},
+		{year:5768,month:12,expect:30},
+		{year:5768,month:13,expect:29},
+		{year:5769,month:1,expect:30},
+		{year:5769,month:2,expect:29},
+		{year:5769,month:3,expect:30},
+		{year:5769,month:4,expect:29},
+		{year:5769,month:5,expect:30},
+		{year:5769,month:6,expect:29},
+		{year:5769,month:7,expect:30},
+		{year:5769,month:8,expect:29},
+		{year:5769,month:9,expect:30},
+		{year:5769,month:10,expect:29},
+		{year:5769,month:11,expect:30},
+		{year:5769,month:12,expect:29}
+		];
+		var max = null, expect = null;
+		for (var i=0;i<dates.length;i++) {
+			var leap = cal.isLeapYear(dates[i].year);
+			var era = 1;
+			max = cal.getMaxDate(era,dates[i].year, dates[i].month);
+			expect = dates[i].expect;
+			assertEquals("Maximum date for "+dates[i].year+'.'+dates[i].month,expect,max);
+			debug("For era/year/month " + [era,dates[i].year,dates[i].month].join('/') + " expected "+expect+" received "+max);
+		}
+	}
+	function testLeapYear() {
+		var isLeap = null;
+		for (var i=0;i<refYears.length;i++) {
+			isLeap = cal.isLeapYear(refYears[i].year);
+			assertEquals("Mismatch for leap year "+refYears[i].year,refYears[i].leap,isLeap);
+			debug("for year "+refYears[i].year+ ": expected "+refYears[i].leap + " received "+isLeap);
+		}
+	}
+	
+	function testDaysToCalendar() {
+		var rd, y, m, d, dow, o, s1,s2;
+		for (var i in refDates) {
+			rd = refDates[i][0];
+			y = refDates[i][1];
+			m = refDates[i][2];
+			d = refDates[i][3];
+			o = cal.daysToCalendar(rd);
+			s1 = [y,m,d].join(':');
+			s2 = [o.YEAR,o.MONTH,o.DATE].join(':');
+			assertEquals("for rd "+rd,s1,s2);
+			debug("for rd "+rd+ ": expected "+s1 + " received "+s2);
+		}
+	}
+	function testCalendarToDays() {
+		var rd, y, m, d, dow, o, s1;
+		for (var i in refDates) {
+			rd = refDates[i][0];
+			y = refDates[i][1];
+			// the refDates is months:1-12 and dates:1-31, but we use months:0-11 and dates:0-30
+			m = refDates[i][2];
+			d = refDates[i][3];
+			o = cal.calendarToDays(0,y,m,d);
+			s1 = [y,m,d].join('.');
+			assertEquals("for y.m.d "+s1,rd,o);
+		}
+	}
+	function testStartOfDay() {
+		assertEquals("Start of day for Hebrew should be midnight",cal.getStartOfDay(),jsorm.Calendar.SUNSET);
+	}
+  </script>
+ </body>
+</html>

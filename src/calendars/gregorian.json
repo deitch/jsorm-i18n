@@ -1,0 +1,255 @@
+/**
+ * @class GregorianCalendar is an object-literal that implements the necessary implementation contract for a CalendarImpl.
+ * Please note that this calendar does not handle the Julian/Gregorian discontinuity. Thus, it implements what is know
+ * as a "proleptic" Gregorian calendar. e.g. The year 876 is treated as a leap year for Gregorian calendar purposes.
+ * This object literal is used as the prototype for a GregorianCalendar, which is processed and created by Calendar.
+ * @name jsorm.GregorianCalendar
+ * @static
+ */
+/** @scope JSORM.GregorianCalendar.prototype */ 
+{
+	getName : function(){return("gregorian");},
+	// day of RD0
+	RD0_DAYS : 1,
+	// Days from RD0 to system epoch
+	EPOCH_DAYS : 719163,
+	DAYS_IN_400_YEARS: 146097,
+	DAYS_IN_100_YEARS: 36524,
+	DAYS_IN_4_YEARS: 1461,
+	DAYS_IN_1_YEAR: 365,
+	CE : 1,
+	BCE : 0,
+	AD : 1,
+	BC : 0,
+
+	/**
+	 * Default locale is English US
+	 */
+	getDefaultLocale : function(){return('en_US');},
+
+	_defaultLocaleInfo : {
+			SUNDAY : 'Sunday:Sun', MONDAY: 'Monday:Mon', TUESDAY: 'Tuesday:Tue', WEDNESDAY: 'Wednesday:Wed',
+			THURSDAY: 'Thursday:Thu', FRIDAY: 'Friday:Fri', SATURDAY: 'Saturday:Sat',
+			JANUARY: 'January:Jan', FEBRUARY: 'February:Feb', MARCH: 'March:Mar', APRIL: 'April:Apr', MAY: 'May:May',
+			JUNE: 'June:Jun', JULY: 'July:Jul', AUGUST: 'August:Aug', SEPTEMBER: 'September:Sep', 
+			OCTOBER: 'October:Oct', NOVEMBER: 'November:Nov', DECEMBER: 'December:Dec',
+			AM: 'AM', PM: 'PM', ERA0: 'BCE', ERA1: 'CE', COUNT0: 'th', COUNT1: 'st', COUNT2: 'nd', COUNT3: 'rd',
+			COUNT21: 'st', COUNT22: 'nd', COUNT23: 'rd', COUNT31: 'st', COUNTN: 'th'
+	},
+	
+
+	/**
+	 * Default locale info
+	 * @private
+	 */
+	getDefaultLocaleInfo : function(key){return(this._defaultLocaleInfo[key]);},
+	
+	getStartOfDay : function(){return(JSORM.calendar.MIDNIGHT);},
+
+	/**
+	 * List of functions to determine the maximum or minimum allowed for a field
+	 */
+	getMaxYear : function(era) { return(era == 1 ? 100000000000000 : -1);},
+	getMaxMonth : function(era,year) {return(12);},
+	getMaxDate : function(era,year,month) {var o=(month-1)%2; var f=Math.floor(month/8); var feb=month==2?1:0; return(31-o+2*f*o-1*f-feb*(2-this.isLeapYear(year)));},
+	getMaxEra : function() {return(1);},
+	getMaxDayOfYear : function(era,year){return(365+this.isLeapYear(year));},
+
+	/**
+	 * List of functions to determine the minimum allowed for a field
+	 */
+	getMinYear : function(era){ return(era == 1 ? 1 : -100000000000000);},
+	getMinMonth : function(era,year) {return(1);},
+	getMinDate : function(era,year,month) {return(1);},
+	getMinEra : function() {return(0);},
+	getMinDayOfYear : function(era,year) { return(1);},
+
+	/**
+	 * determine if a year is a leap year
+	 * leaps is just a cache so we do not recalculate
+	 * @private
+	 */
+	leaps : {},
+	isLeapYear : function(y) {
+		var leaps = this.leaps;
+		// cache for future use to make it quicker
+		if (leaps[y] === undefined) {
+			var m = y%400;
+			leaps[y] = (y%4 === 0) && (m != 100) && (m != 200) && (m != 300);
+		}
+		return(leaps[y]);
+	},
+	/**
+	 * Special mod function. The general javascript % (mod) function will return the same sign (positive or negative) of the
+	 * numerator. E.g. -1%3 = -1, while 1%3 = 1. We need a mod function that always follows the denominator, e.g. -1%3 = 1, 
+	 * while 1%-3 = 1.
+	 * @private
+	 */
+	mod : function(x,y) {return ( x - y*(Math.floor(x/y)));},
+	
+	/**
+	 * Determine year and week of year according to ISO8601
+	 * ISO8601 says that the first week is the week, beginning on Monday
+	 * containing Thursday that is in the Gregorian year. Thus, if Jan 1 is Thu, then
+	 * any day from Monday before through Sunday after is in week 1. If Jan 1 is on Fri, then
+	 * any day from Monday before through Sunday after is in the last week of the previous
+ 	 * year. That week may be week 52 or week 53, depending on the year.
+ 	 * 
+ 	 * Put in other terms, ISO says that processing is determined by first day of week = 1 and
+ 	 * minimum days in week = 4.
+ 	 * @param {int} dayOfYear The day in the given year, from 0 to 364 or 365
+ 	 * @param {int} dayOfWeek The day of the week
+ 	 * @param {int} year The Gregorian year
+ 	 * @param {int} leap The number of leap days in the year, either 0 or 1
+ 	 * @return {Object} An object with the ISO week count information. The keys are ISO_YEAR and ISO_WEEK_OF_YEAR.
+ 	 * @private
+	 */
+	processIso : function(dayOfYear, dayOfWeek, year, leap) {
+		// constants for ISO - first day of week is always Monday, minDaysInWeek is always 4
+		var firstDayOfWeek = 1;
+		var minDaysInWeek = 4;
+		
+		/*
+		 * First calculate the week of year as taken directly from calendar.js for processWeekCount
+		 */
+		var relDow = this.mod((dayOfWeek - firstDayOfWeek + 7),7);
+		var day1dow = this.mod(dayOfWeek-this.mod(dayOfYear-1,7)+7,7);
+		var day1relDow = this.mod((day1dow-firstDayOfWeek+7),7);
+		var day1wk = 7-day1relDow >= minDaysInWeek ? 1 : 0;
+		var weekOfYear = Math.ceil((dayOfYear-1-relDow) / 7)+day1wk;
+		
+		// date of next Jan 1
+		var prevLeap = this.getMaxDayOfYear(year-1) == 365 ? 1 : 0;
+		var jan1dow = this.mod(dayOfWeek-this.mod(dayOfYear-1,7)+7,7);
+		var daysInYear = this.getMaxDayOfYear(year);
+			
+		// look out in case it is in the previous year or the next year
+		/*
+		 * rule of thumb:
+		 * if (our week of year == 0) then {our year -= 1; our week of year = 52 or 53}
+		 *    week 52 unless (Jan1 day of week == 5) || (Jan1 day of week ==6 && previous leap == true)
+		 *    NOTE: cleaner would be to calculate week1 for previous year, but this is more efficient
+		 * if (our week of year == 53) then {check if our week stays or rolls to next year}
+		 *    Roll if: non-leap: nextJan1dow != 5 ; leap: nextJan1dow != 6 or 5
+		 *    But: nextJan1dow = jan1dow+1+leap
+		 *    So Roll if: non-leap: jan1dow != 4; leap: jan1dow != 4 or 3
+		 *    Simplified: if: jan1dow != 4 && jan1dow+leap != 4
+		 */	
+		if (weekOfYear === 0) {
+			year--;
+			weekOfYear = 52 + (jan1dow == 5 || (jan1dow == 6 && prevLeap)) ? 1 : 0;
+		} else if (weekOfYear == 53 && jan1dow != 4 && jan1dow+leap != 4) {
+			year += 1;
+			weekOfYear = 1;
+		}
+	
+		return({ISO_WEEK_OF_YEAR: weekOfYear, ISO_YEAR: year});		
+	},
+
+	/**
+	 * Function to return the number of days from the RD epoch (1 January 1 CE) to the given date.
+	 * In some calendaring systems, where the day may transition at points other than midnight, this may give
+	 * different answers depending on the time of day. For Gregorian, it is the same. This function is private and
+	 * is intended to be used internally only.
+	 * @param {int} e the era in the Gregorian calendar, 0 for BCE/BC and 1 for CE/AD. Note that if this is 1, and the year is
+	 * 				negative, it is equivalent to a positive number BCE/BC. 
+	 * @param {int} y the year in the Gregorian calendar
+	 * @param {int} m the month in the given year. This is from 0 (January) to 11 (December).
+	 * @param {int} d the year in the given month. This is from 0 to 30, 29, 28 or 27, depending on the month.
+	 * @return {long} number of days since the RD 0, i.e. 1 January 1 CE
+	 * @private
+	 */
+	calendarToDays : function(e,y,m,d) {
+		// deal with era - if the era is BCE, we ignore the era and treat the year as negative
+		if (e === this.BCE && y > 1) {
+			y *= -1;
+		}
+		var epoch = 1;
+		var yearDays = 365*(y-1);
+		var leapDays = Math.floor((y-1)/4) - Math.floor((y-1)/100) + Math.floor((y-1)/400);
+		var monthDays = Math.floor((367*(m)-362)/12);
+		var leapCorrectionDays;
+		if (m < 3) {
+			leapCorrectionDays = 0;
+		} else if (this.isLeapYear(y)) {
+			leapCorrectionDays = -1;
+		} else {
+			leapCorrectionDays = -2;
+		}
+		var fd = epoch - 1 + yearDays + leapDays + monthDays + leapCorrectionDays+d;
+		return(fd);
+	},
+	/**
+	 * Function to return the Gregorian date of a given number of days from the RD epoch (1 January 1 CE).
+	 * In some calendaring systems, where the day may transition at points other than midnight, this may give
+	 * different answers depending on the time of day. For Gregorian, it is the same. This function is private and
+	 * is intended to be used internally only.
+	 * @param {long} date the number of days since the RD 0, i.e. 1 January 1 CE
+	 * @return {Object} with relevant calculated information. The keys to the object are as follows:
+	 * YEAR: the year in the Gregorian calendar
+	 * MONTH: the month in the given year, from 0 (January) to 11 (December)
+	 * DATE: the date in the given month, from 0 to 27, 28, 29 or 30, depending on the month
+	 * DAY_OF_YEAR: the day of the given year this is, from 0 (1 January) to 364 or 365
+	 * LEAP: number of leap days in the given year, either 1 or 0
+	 * ERA: 1 for AD/CE, 0 for BC/BCE
+	 * DAY_OF_WEEK: day of week of the given date, from 0 (Sunday) through 6 (Saturday)
+	 * DAY_OF_WEEK_IN_MONTH: the incidence of the day of week in the given month from 1 to 5
+	 * @private
+	 */
+	daysToCalendar : function(date) {
+		// calculate the y/m/d
+		// RD of the Gregorian Epoch (0001.01.01)
+		var epoch = 1;
+		// first calculate the year
+		// days between our date and RD1
+		var rDays = date - epoch;
+		// how many whole 400 year units are there?
+		var n400 = Math.floor(rDays/this.DAYS_IN_400_YEARS);
+		// how many days left that are less than 400
+		var d400 = this.mod(rDays,this.DAYS_IN_400_YEARS);
+		// how many 100 year units are there left?
+		var n100 = Math.floor(d400/this.DAYS_IN_100_YEARS);
+		// how many days left that are less than 100?
+		var d100 = this.mod(d400,this.DAYS_IN_100_YEARS);
+		// how many 4 year units?
+		var n4 = Math.floor(d100/this.DAYS_IN_4_YEARS);
+		// how many days left that are less than 4?
+		var d4 = this.mod(d100,this.DAYS_IN_4_YEARS);
+		// how many single year units are left?
+		var n1 = Math.floor(d4/this.DAYS_IN_1_YEAR);
+	  	// are we at the last day of a leap year?
+	  	var lastDayLeap = n100==4 || n1 == 4;
+		var year = 400*n400 + 100*n100 + 4*n4 + n1 + (lastDayLeap ? 0 : 1);
+
+		// we need to know the date for year.03.01 (March 1)
+		var leap = this.isLeapYear(year);
+	
+	   	//how many individual days are left?
+	  	var d1 = lastDayLeap  ? this.DAYS_IN_1_YEAR : this.mod(d4,this.DAYS_IN_1_YEAR);
+
+		// next calculate the month
+		var priorDays = d1;
+		var leapCorrectionDays = 0;
+		var march1 = 31+28+ (leap ? 1 : 0);
+		if (priorDays < march1) {
+			leapCorrectionDays = 0;
+		} else if (priorDays >= march1 && leap) {
+			leapCorrectionDays = 1;
+		} else {
+			leapCorrectionDays = 2;
+		}
+
+		var month = Math.floor((12*(priorDays+leapCorrectionDays)+373) / 367);
+	
+		// day of the month = day of year - days in all previous months
+		var day = d1 - Math.floor((367*(month)-362)/12) + leapCorrectionDays + 1;
+
+		var era = year <= 0 ? 0 : 1;
+	
+		var cal = {YEAR: year, MONTH: month, DATE: day, DAY_OF_YEAR: d1+1, LEAP: leap?1:0, ERA: era};
+		// Gregorian alone supports ISO week of year and ISO year
+		JSORM.apply(cal,this.processIso(cal.DAY_OF_YEAR, this.mod(date,7), year, leap));
+		
+		return(cal);
+	}
+}

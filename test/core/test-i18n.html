@@ -1,0 +1,35 @@
+<html>
+	<head>
+		<title>Test Page for i18n</title>
+		<script src="../../../yui_3.0.0.pr2/build/yui/yui-min.js" type="text/javascript"></script> 
+		<script src="jsorm-i18n-src.js"></script>
+		<script src="test-core.js"></script>
+		<script src="test-calendar.js"></script>
+		<script src="test-currency.js"></script>
+		<script src="test-resourcebundle.js"></script>
+		<script src="test-timezone.js"></script>
+		<script type="text/javascript">
+			function go(test) {
+				var local = true;
+				var conf = {
+					base: '../../yui_3.0.0.pr2/build/'
+				};
+				YUI(local?conf:null).use("yuitest","console",test);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>i18n Tests</h1>
+		<div id="tests">
+			<table>
+				<tr><td><input type="button" value="Core" width="500" onclick="go('core')"></input></td></tr>
+				<tr><td><input type="button" value="Calendar"></input></td></tr>
+				<tr><td><input type="button" value="Currency"></input></td></tr>
+				<tr><td><input type="button" value="ResourceBundle"></input></td></tr>
+				<tr><td><input type="button" value="TimeZone"></input></td></tr>
+				<tr><td><input type="button" value="All"></input></td></tr>
+			</table>
+		</div>
+		<div id="results"></div>
+	</body>
+</html>

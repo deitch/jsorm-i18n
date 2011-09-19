@@ -1,0 +1,37 @@
+<html>
+<head>
+  <title>ResourceBundle Sample Page 2</title>
+  <script type="text/javascript" src="jsorm-i18n.js"></script>
+  <script type="text/javascript">
+  var locale;
+  function doSelect() {
+	var langField, span, newLocale;
+	// get the select that contains the chosen language
+	langField = document.getElementById('langList');
+	// get the span where we will output the results
+	span = document.getElementById('langtest');
+	// what is the newLocale requested?
+	newLocale = langField.value;
+	if (locale == null || locale.givenLocale != newLocale) {
+		// this is how we load a new bundle
+		var config = {path: './', locale: newLocale, name: 'MyBundle', callback: function(success,bundle,options) {
+			if (success) {
+				// save the new bundle
+				locale = bundle;
+				span.innerHTML = locale.get('hello') + ', ' + locale.get('john') + '!';
+			}
+		}};
+		// load the bundle and get the callback
+		JSORM.ResourceBundle.getBundle(config);
+	}
+  }
+  </script>
+</head>
+<body>
+<form>
+					<select id="langList" onchange="doSelect();"><option value="en_US" selected>US English</option><option value="fr_FR" selected>France French</option></select>
+					<p/>
+				</form>
+  <span id="langtest">Select a language above to fill this in.</span>
+<body>
+</html>

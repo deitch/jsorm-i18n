@@ -1,0 +1,183 @@
+/**
+ * @class IslamicCalendar is an object-literal that implements the necessary implementation contract for a CalendarImpl.
+ * Please note that this calendar does not calculate when sunset/nightfall occurs, the time of day switching in the Islamic
+ * calendar. Thus, the Islamic calendar can have two days for each Gregorian day: midnight (=beginning of Gregorian date) 
+ * through nightfall is Islamic day 1, and nightfall through midnight (=end of Gregorian date) is Islamic day 2.
+ * This object literal is used as the prototype for a IslamicCalendar, which is processed and created by Calendar.
+ * @name JSORM.IslamicCalendar
+ * @static
+ */
+/** @scope JSORM.IslamicCalendar.prototype */ 
+{
+	getName : function(){return("islamic");},
+	getStartOfDay : function(){return(JSORM.calendar.SUNSET);},
+	// first date of Islamic calendar relative to RD0
+	RD0_DAYS : 227015,
+
+	/**
+	 * Default locale is English US
+	 * @private
+	 */
+	getDefaultLocale: function(){return('en_US');},
+
+	/**
+	 * Default locale info
+	 * @private
+	 */
+	_defaultLocaleInfo : {
+		SUNDAY : 'Sunday:Sun', MONDAY: 'Monday:Mon', TUESDAY: 'Tuesday:Tue', WEDNESDAY: 'Wednesday:Wen',
+		THURSDAY: 'Thursday:Thu', FRIDAY: 'Friday:Fri', SATURDAY: 'Saturday:Sat',
+		JANUARY: 'Mu\u1e25arram', FEBRUARY: '\u1e62afar', MARCH: 'Rab\u012b\' al-Awwal', APRIL: 'Rab\u012b\' al-\u0100\u1e25ir', 
+		MAY: 'Jum\u0101d\u0101 al-\u016al\u0101',
+		JUNE: 'Jum\u0101d\u0101 al-\u0100\u1e25ira', JULY: 'Rajab', AUGUST: 'Sha\'b\u0101n', SEPTEMBER: 'Rama\u1e0d\u0101n', 
+		OCTOBER: 'Shaww\u0101l', NOVEMBER: 'Dhu al-Qa\'da', DECEMBER: 'Dhu al-\u1e24ijja', UNDECIMBER: '',
+		AM: 'AM', PM: 'PM', ERA0: '', ERA1: '', COUNT0: 'th', COUNT1: 'st', COUNT2: 'nd', COUNT3: 'rd',
+		COUNT21: 'st', COUNT22: 'nd', COUNT23: 'rd', COUNT31: 'st', COUNTN: 'th'
+	},
+	getDefaultLocaleInfo : function(key){return(this._defaultLocaleInfo[key]);},
+
+	/**
+	 * determine if a year is a leap year
+	 * leaps is just a cache so we do not recalculate
+	 * @private
+	 */
+	leaps : {},
+	isLeapYear : function(y) {
+		var leaps = this.leaps;
+		// cache for future use to make it quicker
+		if (!leaps[y]) {
+			leaps[y] = this.mod((14+11*y),30) < 11;
+		}
+		return(leaps[y]);
+	},
+	/**
+	 * Special mod function. The general javascript % (mod) function will return the same sign (positive or negative) of the
+	 * numerator. E.g. -1%3 = -1, while 1%3 = 1. We need a mod function that always follows the denominator, e.g. -1%3 = 1, 
+	 * while 1%-3 = 1.
+	 * @private
+	 */
+	mod : function(x,y) {return ( x - y*(Math.floor(x/y)));},
+		
+	muharram : {},
+	/**
+	 * Function to return the days from the Islamic epoch through Muharram 1 of an Islamic year
+	 * @param {int} y The Islamic year
+	 * @return {long} The days from the Islamic epoch through Muharram 1 of the given Islamic year
+	 * @private
+	 */
+	getMuharram : function(y) {
+		// check the cache and use it, if we can
+		var m = this.muharram;
+		if (!m[y]) {
+			// cache is empty, so calculate it directly
+			// calculate all of the days since the Islamic epoch
+			// First, the normal year has 354 days, so add up all of those 354*(y-1)
+			// Second, since Islamic years have 355 days, add one day for each leap year
+			// the number of leap years up to an Islamic year is given by Math.floor((3+11*y)/30)
+			m[y] = 354*(y-1)+Math.floor((3+11*y)/30);
+		}
+		return(m[y]);
+	},
+	/**
+	 * Function to return the number of days in all the months of an Islamic year up to and including the 
+	 * given month
+	 * @param {int} m The month of the year, from 1 (Muharram) to 12 (Dhu al-Hijja)
+	 * @return {int} The number of days in the month
+	 * @private
+	 */
+	getMonthDays : function(m) {
+		// every month has 29, except for odd ones, so every two months have 59, for an average of 29.5
+		//  all we need to do is do (30+29)/2 = 29.5*m, and round up
+		return(Math.ceil(29.5*m));
+	},
+	/**
+	 * Function to return the Islamic date of a given number of days from the RD epoch (1 January 1 CE Gregorian).
+	 * In Islamic, where the day transitions at sunset rather than midnight, this will give
+	 * different answers depending on the time of day. The assumption here is that the day is during normal daylight hours.
+	 * To adjust for after nightfall/sunset, it must be taken into account.
+	 * This function is private and is intended to be used internally only.
+	 * @param {long} date the number of days since the RD 0, i.e. 1 January 1 CE
+	 * @return {Object} with relevant calculated information. The keys to the object are as follows:
+	 * YEAR: the year in the Islamic calendar
+	 * MONTH: the month in the given year, from 0 (Muharram) to 11 (Dhu al-Hijja)
+	 * DATE: the date in the given month, from 0 to 28 or 29, depending on the month
+	 * DAY_OF_YEAR: the day of the given year this is, from 0 (1 Muharram) to 354 (regular) or 355 (leap)
+	 * LEAP: if the year is a leap year, either 1 for true or 0 for false
+	 * ERA: not used, always returns 0
+	 * DAY_OF_WEEK: day of week of the given date, from 0 (Sunday) through 6 (Saturday)
+	 * DAY_OF_WEEK_IN_MONTH: the incidence of the day of week in the given month from 1 to 5
+	 * @private
+	 */
+	daysToCalendar : function(date) {
+		var c = this;
+		var epoch = c.RD0_DAYS;
+		// calculate the y/m/d
+		
+		// complete years between our date and epoch of Islamic calendar
+		var y = Math.floor((30*(date-epoch)+10646)/10631);
+		
+		// how many individual days are left in the year? it is the date minus the date of Muharram 1
+		var priorDays = date - epoch- c.getMuharram(y);
+		
+		// now figure out how many months are left in those days
+		// using the reverse of this.getMonthDays(), we do
+		//  Math.floor(priorDays/29.5+1)
+		var m = Math.floor(priorDays/29.5);
+		var monthDays = c.getMonthDays(m);
+
+		// now we have the year and the month. The remainder is the days in the month
+		var day = priorDays - monthDays + 1;  // THIS MUST BE OFF
+
+		// the era in the Islamic calendar is always 0
+		var era = 0;
+		var leap = c.isLeapYear(y);
+
+		var cal = {ERA: era, YEAR: y, MONTH: m+1, DATE: day, DAY_OF_YEAR: priorDays+1, LEAP: leap?1:0};
+		return(cal);
+	},
+
+	/**
+	 * Function to return the number of days from the RD epoch (1 January 1 CE) to the given date.
+	 * In Islamic, where the day transitions at sunset rather than midnight, this will give
+	 * different answers depending on the time of day. The assumption here is that the day is during normal daylight hours.
+	 * To adjust for after nightfall/sunset, it must be taken into account.
+	 * This function is private and is intended to be used internally only.
+	 * @param {int} e the era in the Islamic calendar, which is ignored, as it is meaningless
+	 * @param {int} y the year in the Islamic calendar
+	 * @param {int} m the month in the given year. This is from 0 (Muharram) to 11 (Dhu al-Hijja).
+	 * @param {int} d the day in the given month. This is from 0 to 28 or 29, depending on the month.
+	 * @return {long} number of days since the RD 0, i.e. 1 January 1 CE
+	 * @private
+	 */
+	calendarToDays : function(e,y,m,d) {
+		var epoch = this.RD0_DAYS;
+
+		// first find the RD of Muharram 1 of the given Islamic year
+		var yearDays = this.getMuharram(y);
+		
+		// next add the number of days in the months prior to the given month
+		var monthDays = this.getMonthDays(m-1);
+
+		// finally, add the number of days actually given and the RD of the epoch Islamic calendar
+		var fd = epoch + yearDays + monthDays + d -1;
+		
+		return(fd);
+	},
+	
+	/**
+	 * List of functions to determine the maximum or minimum allowed for a field
+	 * @private
+	 */
+	getMaxEra : function() {return(0);},
+	getMinEra : function() {return(0);},
+	getMaxYear : function(era) {return(100000000000000);},
+	getMinYear : function(era) {return(1);},
+	getMaxMonth : function(era,year) {return(12);},
+	getMinMonth : function(era,year) {return(1);},
+	// even months have a maxDate of 29, except month 12 in a leap year, which has 30
+	// All others have 30
+	getMaxDate : function(era,year,month) {return((month == 12 && this.isLeapYear(year)) || this.mod(month,2) == 1 ? 30 : 29);},
+	getMinDate : function(era,year,month) {return(1);},
+	getMaxDayOfYear : function(era,year) {return(this.isLeapYear(year)?355:354);},
+	getMinDayOfYear : function(era,year) {return(1);}
+}

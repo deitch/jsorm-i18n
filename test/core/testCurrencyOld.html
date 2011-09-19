@@ -1,0 +1,83 @@
+<html>
+ <head>
+  <title>Test Page for Currency.js Module</title>
+  <script language="javascript" src="../../../jsunit/app/jsUnitCore.js"></script>
+</head>
+ <body>
+ 	<script language="javascript" src="../../src/core/base.js"></script>
+ 	<script language="javascript" src="../../src/core/currency.js"></script>
+	<script language="javascript">
+	// list of zones to test and test inputs and expected outputs
+	// each key is the name of a zone to load and check
+	// each value is an array of tests
+	// each test is itself an array whose keys are: [message,expected_value,time]
+	var tests = {
+				  "USD":{name: 'Dollars', country: 'United States of America', tests:[["Whole positive with decimals","$20.00",20.00],["Whole positive","$15.00",15],
+						["Whole negative with decimals",'-$15.25',-15.25],["Whole negative",'-$2.00',-2]]},
+				  "GBP":{name: 'Pounds', country: 'United Kingdom', tests: [["Whole positive with decimals","\u00a3"+"20.00",20.00],["Whole positive","\u00a3"+"15.00",15],
+						["Whole negative with decimals","-\u00a3"+'15.25',-15.25],["Whole negative","-\u00a3"+'2.00',-2]]},
+				  "ILS":{name: 'New Shekels', country: 'Israel', tests:[["Whole positive with decimals",'\u20aa'+"20.00",20.00],["Whole positive",'\u20aa'+"15.00",15],
+						["Whole negative with decimals",'-\u20aa'+'15.25',-15.25],["Whole negative",'-\u20aa'+'2.00',-2]]},
+				  "CAD":{name: 'Dollars', country: 'Canada', tests: [["Whole positive with decimals","$20.00",20.00],["Whole positive","$15.00",15],
+						["Whole negative with decimals",'-$15.25',-15.25],["Whole negative",'-$2.00',-2]]}
+				};
+	// expected number of currencies
+	var numCurrencies = 127;
+	// to hold our setUpPageStatus
+	var cuList = null, cuObj = {};
+	// initial set up, following which we run the test
+	function setUpNative() {
+		setUpPage();
+	}
+	function setUpPage() {
+		setUpPageStatus = 'complete';		
+	}
+	</script>
+  <script language="javascript">
+	/*
+	 * Functions to test currency functionality.
+	 * These are the tests we want to perform:
+	 * 1) Test we have the right number of currencies
+	 * 2) Test that a null currency gives the default
+	 * 3) Test that an unknown currency gives the default
+	 * 4) Test conversion of several amounts in each of several currencies
+	 * 5) Test expected currency names for several countries
+	 * 6) Test expected country names for several countries
+	 */
+	function testNumCurrencies() {
+		var count=jsorm.Currency.getCurrencies().length;
+		assertEquals("Wrong number of currencies",numCurrencies,count);
+	}
+	function testNullCurrency() {
+		var cur = new jsorm.Currency();
+		assertEquals("Null currency gives wrong default",jsorm.Currency.defaultCurrency,cur.getAbbreviation());
+	}
+	function testBadCurrency() {
+		var cur = new jsorm.Currency("XYZ");
+		assertEquals("Null currency gives wrong default",jsorm.Currency.defaultCurrency,cur.getAbbreviation());
+	}
+	function testConversions() {
+		var cur,message,expect,input,output;
+		for (var i in tests) {
+			cur = new jsorm.Currency(i);
+			for (var j=0;j<tests[i].tests.length;j++) {
+				message = tests[i].tests[j][0];
+				expect = tests[i].tests[j][1];
+				input = tests[i].tests[j][2];
+				output = cur.format(input);
+				assertEquals(message+":"+i,expect,output);
+			}
+		}
+	}
+	function testNames() {
+		var cur,expect,output;
+		for (var i in tests) {
+			cur = new jsorm.Currency(i);
+			assertEquals("Check abbreviation:"+i,i,cur.getAbbreviation());
+			assertEquals("Check name:"+i,tests[i].name,cur.getName());
+			assertEquals("Check country:"+i,tests[i].country,cur.getCountry());
+		}
+	}
+  </script>
+ </body>
+</html>

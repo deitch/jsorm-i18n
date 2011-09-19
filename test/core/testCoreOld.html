@@ -1,0 +1,20 @@
+<html>
+ <head>
+  <title>Test Suite for i18n Core Modules</title>
+  <script language="javascript" src="../../../jsunit/app/jsUnitCore.js"></script>
+  <script language="javascript">
+	var pages = ["testCurrency.html","testTimezone.html","testResourceBundle.html","testCalendar.html"];
+	function suite() {
+		var path = '../../JavaScript/i18n/test/core/';
+        var newsuite = new top.jsUnitTestSuite();
+		for (var i in pages) {
+			newsuite.addTestPage(path+pages[i]);
+		}
+        return newsuite;		
+	}	
+  </script>
+</head>
+ <body>
+	<h1>Test Suite for all core tests</h1>
+ </body>
+</html>

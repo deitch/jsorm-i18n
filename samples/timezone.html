@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+	<head>
+		<title>TimeZone Sample</title>
+		<script type="text/javascript" src="jsorm-i18n.js"></script>
+		<script type="text/javascript">
+		var zone, listSelect, yField, mField, dField, hField, minField, secField, offsetField, dstField, abbrField;
+		function load() {
+			// get references to the key form elements
+			listSelect = document.getElementById('zoneList');
+			yField = document.getElementById('yField');
+			mField = document.getElementById('mField');
+			dField = document.getElementById('dField');
+			hField = document.getElementById('hField');
+			minField = document.getElementById('minField');
+			secField = document.getElementById('secField');
+			offsetField = document.getElementById('offsetField');
+			dstField = document.getElementById('dstField');
+			abbrField = document.getElementById('abbrField');
+
+			// make sure we are using only the local path
+			JSORM.TimeZone.basepath = './';
+			JSORM.TimeZone.path = 'zoneinfo/';
+
+			// load up the zone list
+			JSORM.TimeZone.getZoneList({callback: function(success,zones,opts) {
+				if (success) {
+					// set the select options to be from the list
+					var list = [];
+					for (var z in zones.zones) {
+						list.push(z);
+					}
+					list = list.sort();
+					for (var i=0; i<list.length; i++) {
+						listSelect.options[i] = new Option(list[i],list[i]);
+					}					
+				}
+			}});
+			
+		}
+		function doSetOutput() {
+			// we use 0-11 for months and 0-27/28/29/30 for dates, while the display is 1-12 and 1-28/29/30/31
+			var y = parseInt(yField.value), m = parseInt(mField.value)-1, d = parseInt(dField.value)-1;
+			var h = parseInt(hField.value), min = parseInt(minField.value), sec = parseInt(secField.value);
+			// get the details at that moment in time
+			var obj = zone.getZoneInfo(y,m,d,h,min,sec);
+			if (obj) {
+				offsetField.value = obj.offset;
+				dstField.value = obj.isDst;
+				abbrField.value = obj.abbr;
+			}
+		}
+		function doSelect() {
+			// what new currency, if any, do we want?
+			var newZone = listSelect.value;
+			if (zone == null || zone.getName() != newZone) {
+				// this is how we load a new zone
+				var config = {basepath: './', path: 'zoneinfo/', name: newZone, callback: function(success,loadzone,options) {
+					if (success) {
+						zone = loadzone;
+						doSetOutput();
+					}
+				}};
+				JSORM.TimeZone.getZone(config);
+			} else {
+				doSetOutput();
+			}
+		}
+		</script>
+	</head>
+	<body onload="load()">
+		<div id="sample">
+			<div id="instructions">
+				<h2>Instructions</h2>
+			Be sure to examine the source code to this file. All the example code is include in a script tag.<br/>
+			It is also <b>strongly</b> recommended that you run this at least once in <a href="http://www.mozilla.com/firefox">Firefox</a> 
+			with <a href="http://getfirebug.com">Firebug</a> installed, so you can see how and when TimeZone searches for
+			resources from the server.
+			<p/>
+			Select a timezone, enter the year, month, day, hour, minute, second you want. The results section will give
+			you the offset from GMT/UTC for that moment in time, whether or not the zone is in DST, and its abbreviation.<br/>
+			The list of selectable zones is taken from TimeZone.getZoneList().
+			 <br/>
+			</div>
+			<div id="output">
+				<form>
+					<select id="zoneList" onchange="doSelect();"></select><br/>
+					<table>
+						<tr><td>Year</td><td>Month (1-12)</td><td>Date (1-28/29/30/31)</td><td>Hour (0-23)</td><td>Minute (0-59)</td><td>Second (0-59)</td></tr>
+						<tr>
+							<td><input id="yField" type="text" value="2008" onchange="doSelect();"></input></td>
+							<td><input id="mField" type="text" value="1" onchange="doSelect();"></input></td>
+							<td><input id="dField" type="text" value="1" onchange="doSelect();"></input></td>
+							<td><input id="hField" type="text" value="13" onchange="doSelect();"></input></td>
+							<td><input id="minField" type="text" value="5" onchange="doSelect();"></input></td>
+							<td><input id="secField" type="text" value="25" onchange="doSelect();"></input></td>
+						</tr>
+					</table>
+					<p/>
+					<table>
+						<tr><td>Offset (seconds)</td><td>DST (0=no,1=yes)</td><td>Abbreviation</td></tr>
+						<tr>
+							<td><input id="offsetField" type="text" disabled="true" value=""></input></td>
+							<td><input id="dstField" type="text" disabled="true" value=""></input></td>
+							<td><input id="abbrField" type="text" disabled="true" value=""></input></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>
