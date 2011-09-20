@@ -1,7 +1,7 @@
-testFn.testCore = function(Y) {
-	var suite = new Y.Test.Suite("Core Tests");
-	suite.add(testFn.testCalendar(Y));
-	suite.add(testFn.testCurrency(Y));
-	suite.add(testFn.testResourceBundle(Y));
-	suite.add(testFn.testTimeZone(Y));
+testFn.testCore = function(T) {
+	var suite = new T.testSuite("Core Tests");
+	suite.add(testFn.testCalendar(T));
+	suite.add(testFn.testCurrency(T));
+	suite.add(testFn.testResourceBundle(T));
+	suite.add(testFn.testTimeZone(T));
 };

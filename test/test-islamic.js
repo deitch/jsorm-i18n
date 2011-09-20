@@ -1,5 +1,5 @@
 /*global JSORM */
-testFn.testIslamicCalendar = function(Y) {
+testFn.testIslamicCalendar = function(T) {
 	var cal;
 	var retText = null;
 
@@ -86,7 +86,7 @@ testFn.testIslamicCalendar = function(Y) {
 		{year: 900, leap: false, months: 12, days: 354}
 	];
 
-	var o = testCalImpl(Y,"Islamic Calendar Tests","../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
-	return new Y.Test.Case(o);
+	var o = testCalImpl(T,"Islamic Calendar Tests","../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	return new T.testCase(o);
 };
 

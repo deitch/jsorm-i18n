@@ -44,6 +44,16 @@
 		
 		<script type="text/javascript">
 			/*global YUI */
+			// important to convert Y to generic testing, so we can abstract out
+			var makeDriver = function(Y){
+				return {
+					equal: Y.Assert.areEqual,
+					notNull: Y.Assert.isNotNull,
+					isNull: Y.Assert.isNull,
+					testCase: Y.Test.Case,
+					testSuite: Y.Test.Suite
+				};
+			};
 			function go(test) {
 				var local = false, conf, f;
 				conf = {
@@ -51,13 +61,13 @@
 				};
 				f = (function() {
 					return function(Y) {
-						var i, list, yconsole;
+						var i, list, yconsole, driver = makeDriver(Y);
 						if (test !== null) {
-							Y.Test.Runner.add(test(Y));							
+							Y.Test.Runner.add(test(driver));							
 						} else {
 							for (i=0;i<tests.length;i++) {
 								if (tests[i].fn !== null) {
-									Y.Test.Runner.add(tests[i].fn(Y));																
+									Y.Test.Runner.add(tests[i].fn(driver));																
 								}
 							}
 						}

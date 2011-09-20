@@ -1,10 +1,10 @@
-/*global JSORM */
-testFn.testResourceBundle = function(Y) {
+/*global JSORM, testFn */
+testFn.testResourceBundle = function(T) {
 	var B = JSORM.ResourceBundle;
 	// set paths
 	B.path = 'core/';
 
-	return new Y.Test.Case({
+	return new T.testCase({
 		name: "ResourceBundle tests",
 		_should: { 
 			ignore: { 
@@ -28,82 +28,81 @@ testFn.testResourceBundle = function(Y) {
 		 * 6) Retrieve the same key from a bundle in two different locales gives two different results
 		 */
 		testRetrieveEnUs : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNotNull(bundle,"MyBundle en_US retrieval");
+					T.notNull(bundle,"MyBundle en_US retrieval");
 				});
 			};
 			B.getBundle({name:'MyBundle',locale:'en_US',callback:cb});
 			this.wait(3000);
 		},
 		testRetrieveFrFr : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNotNull(bundle,"MyBundle fr_FR retrieval");					
+					T.notNull(bundle,"MyBundle fr_FR retrieval");					
 				});
 			};
 			B.getBundle({name:'MyBundle',locale:'fr_FR',callback:cb});
 			this.wait(3000);
 		},
 		testBadLocale : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNotNull(bundle,"MyBundle FOO locale bad should revert to default en_US");					
-					Y.Assert.areEqual(B.defaultLocale,bundle.locale,"MyBundle FOO locale bad should revert to en_US");
+					T.notNull(bundle,"MyBundle FOO locale bad should revert to default en_US");					
+					T.equal(B.defaultLocale,bundle.locale,"MyBundle FOO locale bad should revert to en_US");
 				});
 			};
 			B.getBundle({name:'MyBundle',locale:'FOO',callback:cb});
 			this.wait(3000);
 		},
 		testEmptyLocale : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNotNull(bundle,"MyBundle <blank> locale bad should revert to default en_US");					
-					Y.Assert.areEqual(B.defaultLocale,bundle.locale,"MyBundle <blank> locale bad should revert to en_US");
+					T.notNull(bundle,"MyBundle <blank> locale bad should revert to default en_US");					
+					T.equal(B.defaultLocale,bundle.locale,"MyBundle <blank> locale bad should revert to en_US");
 				});
 			};
 			B.getBundle({name:'MyBundle',locale:'',callback:cb});
 			this.wait(3000);
 		},
 		testNullLocale : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNotNull(bundle,"MyBundle null locale bad should revert to default en_US");					
-					Y.Assert.areEqual(B.defaultLocale,bundle.locale,"MyBundle null locale bad should revert to en_US");
+					T.notNull(bundle,"MyBundle null locale bad should revert to default en_US");					
+					T.equal(B.defaultLocale,bundle.locale,"MyBundle null locale bad should revert to en_US");
 				});
 			};
 			B.getBundle({name:'MyBundle',locale:null,callback:cb});
 			this.wait(3000);
 		},
 		testInvalidBundle : function() {
-			var test = this;
-			var cb = function(success,bundle,options) {
+			var test = this, cb;
+			cb = function(success,bundle,options) {
 				test.resume(function(){
-					Y.Assert.isNull(bundle,"MyBundle2 bad bundlename should remain null");					
+					T.isNull(bundle,"MyBundle2 bad bundlename should remain null");					
 				});
 			};
 			B.getBundle({name:'MyBundle2',locale:'en_US',callback:cb});
 			this.wait(3000);
 		},
 		testKeys : function() {
-			var test = this, bundles = {}, count = 0;
-			var cb = function(success,bundle,options) {
+			var test = this, bundles = {}, count = 0, cb;
+			cb = function(success,bundle,options) {
 				count++;
 				bundles[options.name] = bundle;
-				if (count == 2) {
+				if (count === 2) {
 					test.resume(function(){
-						var enUsKey = bundles.en_US.get("hello");
-						var frFrKey = bundles.fr_FR.get("hello");
+						var enUsKey = bundles.en_US.get("hello"), frFrKey = bundles.fr_FR.get("hello");
 
-						Y.Assert.isNotNull(enUsKey,"Should be hello");
-						Y.Assert.isNotNull(frFrKey,"Should be bonjour");
-						Y.Assert.areEqual("hello",enUsKey,"Should be hello");
-						Y.Assert.areEqual("bonjour",frFrKey,"Should be bonjour");
+						T.notNull(enUsKey,"Should be hello");
+						T.notNull(frFrKey,"Should be bonjour");
+						T.equal("hello",enUsKey,"Should be hello");
+						T.equal("bonjour",frFrKey,"Should be bonjour");
 					});					
 				}
 			};

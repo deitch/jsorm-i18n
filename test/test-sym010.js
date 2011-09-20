@@ -1,5 +1,5 @@
 /*global JSORM */
-testFn.testSym010Calendar = function(Y) {
+testFn.testSym010Calendar = function(T) {
 	var cal;
 
 	// test bundles: [rd,m,y,d,dow]
@@ -141,7 +141,7 @@ testFn.testSym010Calendar = function(Y) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(Y,"Sym010 Calendar Tests","../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new Y.Test.Case(o);
+	var o = testCalImpl(T,"Sym010 Calendar Tests","../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return new T.testCase(o);
 };
 

@@ -1,7 +1,7 @@
-/*global JSORM */
-testFn.testCalendar = function(Y) {
+/*global JSORM, testFn */
+testFn.testCalendar = function(T) {
 	// centralize all of these calls
-	var C = JSORM.calendar, T = JSORM.TimeZone;
+	var C = JSORM.calendar, TZ = JSORM.TimeZone;
 
 	// test bundles: [rd,m,y,d,dow]
 	var epochDays = 719163;
@@ -1873,8 +1873,8 @@ testFn.testCalendar = function(Y) {
 		
 		var zone = conf[cal].zone;
 
-		T.basepath =  '../';
-		T.path = 'zonebuild/';
+		TZ.basepath =  '../';
+		TZ.path = 'zonebuild/';
 		
 		switch (cal) {
 			case 'gmt':
@@ -1885,13 +1885,13 @@ testFn.testCalendar = function(Y) {
 				break;
 		}
 		if (zone) {
-			T.getZone({name: zone, callback: cb, options: {config: config}});			
+			TZ.getZone({name: zone, callback: cb, options: {config: config}});			
 		} else {
 			cb(true,null,{config: config});
 		}
 	}
 
-	return new Y.Test.Case({
+	return new T.testCase({
 		name : "Calendar tests",
 		_should: { 
 			ignore: { 
@@ -1941,34 +1941,34 @@ testFn.testCalendar = function(Y) {
 							field = tests[i][0];
 							expect = tests[i][1];
 							output = calendars.est.get(field);
-							Y.Assert.areEqual(expect,output,"est "+field);
+							T.equal(expect,output,"est "+field);
 							expect = tests[i][2];
 							output = calendars.gmt.get(field);
-							Y.Assert.areEqual(expect,output,"gmt "+field);
+							T.equal(expect,output,"gmt "+field);
 							expect = tests[i][3];
 							output = calendars.ist.get(field);
-							Y.Assert.areEqual(expect,output,"ist "+field);
+							T.equal(expect,output,"ist "+field);
 						}
 						output = calendars.est.getYear();
-						Y.Assert.areEqual(1969,output,"est year");
+						T.equal(1969,output,"est year");
 						output = calendars.est.getMonth();
-						Y.Assert.areEqual(12,output,"est month");
+						T.equal(12,output,"est month");
 						output = calendars.est.getDate();
-						Y.Assert.areEqual(31,output,"est date");
+						T.equal(31,output,"est date");
 
 						output = calendars.gmt.getYear();
-						Y.Assert.areEqual(1970,output,"gmt year");
+						T.equal(1970,output,"gmt year");
 						output = calendars.gmt.getMonth();
-						Y.Assert.areEqual(1,output,"gmt month");
+						T.equal(1,output,"gmt month");
 						output = calendars.gmt.getDate();
-						Y.Assert.areEqual(1,output,"gmt date");
+						T.equal(1,output,"gmt date");
 
 						output = calendars.ist.getYear();
-						Y.Assert.areEqual(1970,output,"ist year");
+						T.equal(1970,output,"ist year");
 						output = calendars.ist.getMonth();
-						Y.Assert.areEqual(1,output,"ist month");
+						T.equal(1,output,"ist month");
 						output = calendars.ist.getDate();
-						Y.Assert.areEqual(1,output,"ist date");
+						T.equal(1,output,"ist date");
 					});
 				}
 			};
@@ -1990,17 +1990,17 @@ testFn.testCalendar = function(Y) {
 					c.setDate(tests[3]);
 					expect = tests.slice(1,4).join(':');
 					output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-					Y.Assert.areEqual(expect,output,"GMT y:m:d");
+					T.equal(expect,output,"GMT y:m:d");
 
 					// what is the expected time in milliseconds?
 					expect = (tests[0]-epochDays)*millisDay+1*millisHour;
 					output = c.getTime();
-					Y.Assert.areEqual(expect,output,"GMT millis");
+					T.equal(expect,output,"GMT millis");
 
 					// check day of week, day of year, week of month, week of year
 					expect = tests.slice(4).join(':');
 					output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-					Y.Assert.areEqual(expect,output,"dayOfWeek:dayOfYear");
+					T.equal(expect,output,"dayOfWeek:dayOfYear");
 				});
 			};
 			setUpCalendar('gmt',cb);
@@ -2019,17 +2019,17 @@ testFn.testCalendar = function(Y) {
 					c.setDate(tests[3]);
 					expect = '1992:4:1';
 					output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-					Y.Assert.areEqual(expect,output,"GMT y:m:d");
+					T.equal(expect,output,"GMT y:m:d");
 
 					// what is the expected time in milliseconds?
 					expect = (tests[0]-epochDays)*millisDay+1*millisHour;
 					output = c.getTime();
-					Y.Assert.areEqual(expect,output,"GMT millis");
+					T.equal(expect,output,"GMT millis");
 
 					// check day of week, day of year, week of month, week of year
 					expect = tests.slice(4).join(':');
 					output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-					Y.Assert.areEqual(expect,output,"dayOfWeek:dayOfYear");		
+					T.equal(expect,output,"dayOfWeek:dayOfYear");		
 				});
 			};
 			setUpCalendar('gmt',cb);
@@ -2057,7 +2057,7 @@ testFn.testCalendar = function(Y) {
 						expect = tests.slice(1,4).join(':');
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
 						//debug("GMT pre-add y:m:d "+ expect +" "+output);
-						Y.Assert.areEqual(expect,output,"GMT pre-add y:m:d");
+						T.equal(expect,output,"GMT pre-add y:m:d");
 
 						// now we add 15 days to March 17, and expect to get April 1
 						c.add('DATE',addDays);
@@ -2065,17 +2065,17 @@ testFn.testCalendar = function(Y) {
 						outInfo = [tests[0]-epochDays+addDays,tests[1],tests[2],0,tests[4]+1,tests[5]+addDays];
 						expect = "1992:4:1";
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"post-add y:m:d");
+						T.equal(expect,output,"post-add y:m:d");
 
 						// what is the expected time in milliseconds?
 						expect = (outInfo[0])*millisDay+1*millisHour;
 						output = c.getTime();
-						Y.Assert.areEqual(expect,output,"millis post-add");
+						T.equal(expect,output,"millis post-add");
 
 						// check day of week, day of year, week of month, week of year
 						expect = outInfo.slice(4).join(':');
 						output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-						Y.Assert.areEqual(expect,output,"dayOfWeek:dayOfYear");		
+						T.equal(expect,output,"dayOfWeek:dayOfYear");		
 
 						// reset the calendar
 						resetCalendar(c);
@@ -2094,16 +2094,16 @@ testFn.testCalendar = function(Y) {
 						outInfo = [outInfo[0]+1,outInfo[1],outInfo[2],outInfo[3]+1,outInfo[4]+1,outInfo[5]+1];
 						expect = "1992:4:2";
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"post-add-hr y:m:d");
+						T.equal(expect,output,"post-add-hr y:m:d");
 						// what is the expected time in milliseconds?
 						expect = (outInfo[0])*millisDay+15*1000;
 						output = c.getTime();
-						Y.Assert.areEqual(expect,output,"millis post-add-hr");
+						T.equal(expect,output,"millis post-add-hr");
 
 						// check day of week, day of year, week of month, week of year
 						expect = outInfo.slice(4).join(':');
 						output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-						Y.Assert.areEqual(expect,output,"post-add-hr dayOfWeek:dayOfYear");						
+						T.equal(expect,output,"post-add-hr dayOfWeek:dayOfYear");						
 
 						// reset the calendar
 						resetCalendar(c);		
@@ -2118,34 +2118,34 @@ testFn.testCalendar = function(Y) {
 						outInfo = [5730,10,23];
 						expect = outInfo.join(':');
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar initial y.m.d");
+						T.equal(expect,output,"Hebrew calendar initial y.m.d");
 
 						// next move forward 12 hours, past noon, and should stay the same
 						h.add('HOUR',12);
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar add 12 hours to 1:00pm y:m:d");
+						T.equal(expect,output,"Hebrew calendar add 12 hours to 1:00pm y:m:d");
 
 						// next move back to our original 1:00am, should stay the same
 						h.add('HOUR',-12);
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar back to start time y:m:d");
+						T.equal(expect,output,"Hebrew calendar back to start time y:m:d");
 
 						// next move backward 5 hours, to 8:00pm, and should stay the same
 						h.add('HOUR',-5);
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar add -5 hours to 8:00pm y:m:d");
+						T.equal(expect,output,"Hebrew calendar add -5 hours to 8:00pm y:m:d");
 
 						// next move backward 3 hours, to 5:00pm, and should roll back one day
 						h.add('HOUR',-3);
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
 						expect = [outInfo[0],outInfo[1],outInfo[2]-1].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar add -3 hours to 5:00pm y:m:d");
+						T.equal(expect,output,"Hebrew calendar add -3 hours to 5:00pm y:m:d");
 
 						// next move forward 8 hours, to original start, should return to original
 						h.add('HOUR',8);
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
 						expect = outInfo.join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar back to original y:m:d");
+						T.equal(expect,output,"Hebrew calendar back to original y:m:d");
 
 						// reset the calendar
 						resetCalendar(h);
@@ -2175,7 +2175,7 @@ testFn.testCalendar = function(Y) {
 						c.setDate(tests[3]);
 						expect = tests.slice(1,4).join(':');
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"GMT pre-roll y:m:d");
+						T.equal(expect,output,"GMT pre-roll y:m:d");
 						var addDays = 15;
 						c.roll('DATE',addDays);
 
@@ -2183,17 +2183,17 @@ testFn.testCalendar = function(Y) {
 						outInfo = [tests[0]-epochDays-16,1992,3,1,tests[4]-2,tests[5]-16];
 						expect = outInfo.slice(1,4).join(':');
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"post-roll y:m:d");
+						T.equal(expect,output,"post-roll y:m:d");
 
 						// what is the expected time in milliseconds?
 						expect = (outInfo[0])*millisDay+1*millisHour;
 						output = c.getTime();
-						Y.Assert.areEqual(expect,output,"millis");
+						T.equal(expect,output,"millis");
 
 						// check day of week, day of year, week of month, week of year
 						expect = outInfo.slice(4).join(':');
 						output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-						Y.Assert.areEqual(expect,output,"dayOfWeek:dayOfYear");		
+						T.equal(expect,output,"dayOfWeek:dayOfYear");		
 
 						// reset the calendar
 						resetCalendar(c);
@@ -2210,16 +2210,16 @@ testFn.testCalendar = function(Y) {
 
 						expect = outInfo.slice(1,4).join(':');
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
-						Y.Assert.areEqual(expect,output,"post-roll-hr y:m:d");
+						T.equal(expect,output,"post-roll-hr y:m:d");
 						// what is the expected time in milliseconds?
 						expect = (outInfo[0])*millisDay+23*millisHour+59*60*1000+15*1000;
 						output = c.getTime();
-						Y.Assert.areEqual(expect,output,"millis post-roll-hr");
+						T.equal(expect,output,"millis post-roll-hr");
 
 						// check day of week, day of year, week of month, week of year
 						expect = outInfo.slice(4).join(':');
 						output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
-						Y.Assert.areEqual(expect,output,"post-add-hr dayOfWeek:dayOfYear");
+						T.equal(expect,output,"post-add-hr dayOfWeek:dayOfYear");
 
 						// reset the calendar
 						resetCalendar(c);
@@ -2234,19 +2234,19 @@ testFn.testCalendar = function(Y) {
 						outInfo = [5730,10,23,1,0];
 						expect = outInfo.join(':');
 						output = [h.getYear(),h.getMonth(),h.getDate(),h.getHour(),h.getMinute()].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar initial y.m.d");
+						T.equal(expect,output,"Hebrew calendar initial y.m.d");
 
 						// next move backward 8 hours, to 5:00pm, and should change hour, not day
 						h.roll('HOUR',-8);
 						output = [h.getYear(),h.getMonth(),h.getDate(),h.getHour(),h.getMinute()].join(':');
 						expect = [outInfo[0],outInfo[1],outInfo[2],5,0].join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar roll -8 hours to 5:00pm y:m:d");
+						T.equal(expect,output,"Hebrew calendar roll -8 hours to 5:00pm y:m:d");
 
 						// next move forward 8 hours, to original start, should return to original
 						h.roll('HOUR',8);
 						output = [h.getYear(),h.getMonth(),h.getDate(),h.getHour(),h.getMinute()].join(':');
 						expect = outInfo.join(':');
-						Y.Assert.areEqual(expect,output,"Hebrew calendar roll back to original y:m:d");
+						T.equal(expect,output,"Hebrew calendar roll back to original y:m:d");
 
 						// reset the calendar
 						resetCalendar(h);
@@ -2281,15 +2281,15 @@ testFn.testCalendar = function(Y) {
 							expect = tests[i][2];
 							output = calendars.est.format(format,style);
 							//console.log("EST %s style %s expect %s got %s",format,style,expect,output);
-							Y.Assert.areEqual(expect,output,"EST "+format+' '+style);
+							T.equal(expect,output,"EST "+format+' '+style);
 							expect = tests[i][3];
 							output = calendars.gmt.format(format,style);
 							//console.log("GMT %s style %s expect %s got %s",format,style,expect,output);
-							Y.Assert.areEqual(expect,output,"GMT "+format+' '+style);
+							T.equal(expect,output,"GMT "+format+' '+style);
 							expect = tests[i][4];
 							output = calendars.ist.format(format,style);
 							//console.log("IST %s style %s expect %s got %s",format,style,expect,output);
-							Y.Assert.areEqual(expect,output,"IST "+format+' '+style);
+							T.equal(expect,output,"IST "+format+' '+style);
 						}
 					});
 				}
@@ -2323,7 +2323,7 @@ testFn.testCalendar = function(Y) {
 						expect = testDate.slice(7).join(':');
 						o = [cal.getWeekOfMonth(),cal.getWeekOfYear()].join(':');
 						message = "y/m/d/min/first "+ testDate.slice(1,6).join('/');
-						Y.Assert.areEqual(expect,o,message);
+						T.equal(expect,o,message);
 					}
 				});
 			};
@@ -2353,7 +2353,7 @@ testFn.testCalendar = function(Y) {
 							expect = dates[i].slice(5).join(':');
 							o = [cal.get('ISO_WEEK_OF_YEAR'),cal.get('ISO_YEAR')].join(':');
 							message = header + dates[i].slice(0,5).join(':');
-							Y.Assert.areEqual(expect,o,message);							
+							T.equal(expect,o,message);							
 						}
 					}
 				});

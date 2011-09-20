@@ -6,7 +6,7 @@
   <!-- name of the latest version of jsorm.i18n we are working with -->
   <property name="zoneversion" value="2009u"/>
   <!-- name of the latest version of i18n we are working with -->
-  <property name="version" value="1.4"/>
+  <property name="version" value="1.5.0"/>
 
 
   <property file="build.properties"/>
@@ -15,6 +15,7 @@
   <property name="calendars" value="${src}/calendars"/>
   <property name="locale" value="${src}/locale"/>
   <property name="build" value="./build"/>
+  <property name="buildnode" value="./buildnode"/>
   <property name="test" value="./test"/>
   <property name="samples" value="./samples"/>
   <property name="caldest" value="${build}/calendars"/>
@@ -78,13 +79,28 @@
 		<copy todir="${samples}" verbose="true">
 		    <fileset dir="${build}" includes="${minfile},${expfile}"/>
 		</copy>		
+
+
+		<!-- set up node-ready version -->
+	    <mkdir dir="${buildnode}/lib"/>
+		
+		<!-- combine the files into build/ and add the license -->
+		<copy file="${build}/${minfile}" todir="${buildnode}/lib"/>
+		<!-- include version in file -->
+		<replace file="${buildnode}/lib/${minfile}" token="@@version@@" value="${version}"/>		
+		<!-- add the package.json -->
+		<copy file="package.json" todir="${buildnode}"/>	
+		<replace file="${buildnode}/package.json" token="@@version@@" value="${version}"/>		
 	</target>
 	
 	<target name="calendars" depends="init">
 		<!-- minify the files into build/ -->
-		<jsmin destdir="${caldest}">
+		<jsmin destdir="${build}/calendars">
 			<fileset dir="${calendars}" includes="*.json"/>
 		</jsmin>		
+		<copy todir="${buildnode}" verbose="true">
+		    <fileset dir="${build}" includes="calendars/**"/>
+		</copy>		
 		<!-- Include the gregorian calendar file in the samples directory -->
 		<copy todir="${samples}" verbose="true">
 		    <fileset dir="${build}" includes="calendars/*.json"/>
@@ -168,6 +184,10 @@
 			<arg value="${zoneinfo}/${zoneversion}"/>
 			<arg value="${zonebuild}"/>
 		</exec>
+		<!-- copy to node -->
+		<copy todir="${buildnode}" verbose="true">
+		    <fileset dir="${build}" includes="zoneinfo/**"/>
+		</copy>		
 		<!-- include the built files in the sample directory -->
 		<copy todir="${samples}" verbose="true">
 		    <fileset dir="${build}" includes="zoneinfo/**"/>
@@ -207,7 +227,11 @@ does not already exist.
 -->
   <target name="init">
     <mkdir dir="${build}"/>
-    <mkdir dir="${zonebuild}"/>
+    <mkdir dir="${build}/calendars"/>
+    <mkdir dir="${build}/zoneinfo"/>
+    <mkdir dir="${buildnode}"/>
+    <mkdir dir="${buildnode}/calendars"/>
+    <mkdir dir="${buildnode}/zoneinfo"/>
 	<mkdir dir="${caldest}"/>
 	<mkdir dir="${dist}"/>
   </target>
@@ -220,10 +244,13 @@ thinking.  Also: sometimes you'll want to do a completely fresh build,
 such as when changing to a new version of the JDK.
 -->
   <target name="clean" description="Removes previous build">
-    <delete verbose="true" dir="${build}"/>
-    <delete verbose="true" dir="${privatedoc}"/>
-    <delete verbose="true" dir="${zonebuild}"/>
-    <delete verbose="true" dir="${dist}"/>
+    <delete verbose="true">
+		<fileset dir="${build}"/>
+		<fileset dir="${buildnode}"/>
+    	<fileset dir="${privatedoc}"/>
+    	<fileset dir="${zonebuild}"/>
+    	<fileset dir="${dist}"/>
+	</delete>
   </target>
 
 </project>

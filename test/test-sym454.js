@@ -1,5 +1,5 @@
 /*global testFn,JSORM */
-testFn.testSym454Calendar = function(Y) {
+testFn.testSym454Calendar = function(T) {
 	var cal;
 	var retText = null;
 
@@ -141,7 +141,7 @@ testFn.testSym454Calendar = function(Y) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(Y,"Sym454 Calendar Tests","../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new Y.Test.Case(o);
+	var o = testCalImpl(T,"Sym454 Calendar Tests","../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return new T.testCase(o);
 };
 

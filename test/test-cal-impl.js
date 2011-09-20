@@ -1,5 +1,5 @@
 /*global JSORM */
-testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
+testCalImpl = function(T,name,plugin,years,maxDates,refDates,startOfDay) {
 	var cal;
 	var retText = null;
 
@@ -38,7 +38,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 				var max = null;
 				for (var i=0;i<years.length;i++) {
 					max = cal.getMaxMonth(1,years[i]);
-					Y.Assert.areEqual(years[i].months,max,"Maximum month for "+years[i].year);
+					T.equal(years[i].months,max,"Maximum month for "+years[i].year);
 				}					
 			});
 		},
@@ -48,7 +48,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 				for (var i=0;i<dates.length;i++) {
 					var era = 1;
 					max = cal.getMaxDate(era,dates[i].year, dates[i].month);
-					Y.Assert.areEqual(dates[i].expect,max,"Maximum date for "+dates[i].year+'.'+dates[i].month);
+					T.equal(dates[i].expect,max,"Maximum date for "+dates[i].year+'.'+dates[i].month);
 					//debug("For era/year/month " + [era,dates[i].year,dates[i].month].join('/') + " expected "+dates[i].expect+" received "+max);
 				}
 			});
@@ -58,7 +58,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 				var max = null;
 				for (var i=0;i<years.length;i++) {
 					max = cal.getMaxDayOfYear(0,years[i].year);
-					Y.Assert.areEqual(years[i].days,max,"Maximum days in year for "+years[i].year);
+					T.equal(years[i].days,max,"Maximum days in year for "+years[i].year);
 				}				
 			});
 		},
@@ -67,7 +67,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 				var isLeap = null;
 				for (var i=0;i<years.length;i++) {
 					isLeap = cal.isLeapYear(years[i].year);
-					Y.Assert.areEqual(years[i].leap,isLeap,"Mismatch for leap year "+years[i].year);
+					T.equal(years[i].leap,isLeap,"Mismatch for leap year "+years[i].year);
 					//debug("for year "+years[i].year+ ": expected "+years[i].expect + " received "+isLeap);
 				}
 			});
@@ -84,7 +84,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 					o = cal.daysToCalendar(rd);
 					s1 = [y,m,d].join(':');
 					s2 = [o.YEAR,o.MONTH,o.DATE].join(':');
-					Y.Assert.areEqual(s1,s2,"for rd "+rd);
+					T.equal(s1,s2,"for rd "+rd);
 					//debug("for rd "+rd+ ": expected "+s1 + " received "+s2);
 				}
 			});
@@ -101,7 +101,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 					dow = refDates[i][4];
 					o = cal.calendarToDays(1,y,m,d);
 					s1 = [y,m,d].join('.');
-					Y.Assert.areEqual(rd,o,"for y.m.d "+s1);
+					T.equal(rd,o,"for y.m.d "+s1);
 				}
 			});
 		},
@@ -109,7 +109,7 @@ testCalImpl = function(Y,name,plugin,years,maxDates,refDates,startOfDay) {
 			this.runTest(function(cal) {
 				for (var i=0;i<refDates.length;i++) {
 					//console.log(jsorm.calendar);
-					Y.Assert.areEqual(startOfDay,cal.getStartOfDay(),"Start of day should be midnight",cal.getStartOfDay());
+					T.equal(startOfDay,cal.getStartOfDay(),"Start of day should be midnight",cal.getStartOfDay());
 				}
 			});
 		}

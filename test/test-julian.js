@@ -1,5 +1,5 @@
 /*global JSORM */
-testFn.testJulianCalendar = function(Y) {
+testFn.testJulianCalendar = function(T) {
 	var cal;
 	var retText = null;
 
@@ -97,7 +97,7 @@ testFn.testJulianCalendar = function(Y) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(Y,"Julian Calendar Tests","../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new Y.Test.Case(o);
+	var o = testCalImpl(T,"Julian Calendar Tests","../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return new T.testCase(o);
 };
 

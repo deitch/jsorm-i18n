@@ -1,5 +1,5 @@
 /*global JSORM */
-testFn.testGregorianCalendar = function(Y) {
+testFn.testGregorianCalendar = function(T) {
 	var cal;
 	var retText = null;
 
@@ -98,7 +98,7 @@ testFn.testGregorianCalendar = function(Y) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(Y,"Gregorian Calendar Tests","../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new Y.Test.Case(o);	
+	var o = testCalImpl(T,"Gregorian Calendar Tests","../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return new T.testCase(o);	
 };
 

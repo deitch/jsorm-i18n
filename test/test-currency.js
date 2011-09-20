@@ -1,5 +1,5 @@
 /*global JSORM, testFn */
-testFn.testCurrency = function(Y) {
+testFn.testCurrency = function(T) {
 	var C = JSORM.currency;
 	// list of zones to test and test inputs and expected outputs
 	// each key is the name of a zone to load and check
@@ -28,19 +28,19 @@ testFn.testCurrency = function(Y) {
 	 * 6) Test expected country names for several countries
 	 */
 	
-	return new Y.Test.Case({
+	return new T.testCase({
 		name : "Currency Tests",
 		testNumCurrencies : function() {
 			var count=C.getCurrencies().length;
-			Y.Assert.areEqual(numCurrencies,count,"Wrong number of currencies");
+			T.equal(numCurrencies,count,"Wrong number of currencies");
 		},
 		testNullCurrency : function() {
 			var cur = C();
-			Y.Assert.areEqual(C.defaultCurrency,cur.getAbbreviation(),"Null currency gives wrong default");
+			T.equal(C.defaultCurrency,cur.getAbbreviation(),"Null currency gives wrong default");
 		},
 		testBadCurrency : function() {
 			var cur = C("XYZ");
-			Y.Assert.areEqual(C.defaultCurrency,cur.getAbbreviation(),"Null currency gives wrong default");
+			T.equal(C.defaultCurrency,cur.getAbbreviation(),"Null currency gives wrong default");
 		},
 		testConversions : function() {
 			var cur,message,expect,input,output;
@@ -52,7 +52,7 @@ testFn.testCurrency = function(Y) {
 						expect = tests[i].tests[j][1];
 						input = tests[i].tests[j][2];
 						output = cur.format(input);
-						Y.Assert.areEqual(expect,output,message+":"+i);
+						T.equal(expect,output,message+":"+i);
 					}					
 				}
 			}
@@ -62,9 +62,9 @@ testFn.testCurrency = function(Y) {
 			for (var i in tests) {
 				if (tests.hasOwnProperty(i) && typeof(i) === "string") {
 					cur = C(i);
-					Y.Assert.areEqual(i,cur.getAbbreviation(),"Check abbreviation:"+i);
-					Y.Assert.areEqual(tests[i].name,cur.getName(),"Check name:"+i);
-					Y.Assert.areEqual(tests[i].country,cur.getCountry(),"Check country:"+i);
+					T.equal(i,cur.getAbbreviation(),"Check abbreviation:"+i);
+					T.equal(tests[i].name,cur.getName(),"Check name:"+i);
+					T.equal(tests[i].country,cur.getCountry(),"Check country:"+i);
 				}
 			}
 		}	

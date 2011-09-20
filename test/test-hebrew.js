@@ -1,5 +1,5 @@
 /*global JSORM */
-testFn.testHebrewCalendar = function(Y) {
+testFn.testHebrewCalendar = function(T) {
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
 	//  day of year, week of month, week of year calculated by genRefDates.java
@@ -374,6 +374,6 @@ testFn.testHebrewCalendar = function(Y) {
 	var years = [];
 
 	// get the configuration object literal
-	var o = testCalImpl(Y,"Hebrew Calendar Tests","../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
-	return new Y.Test.Case(o);
+	var o = testCalImpl(T,"Hebrew Calendar Tests","../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	return new T.testCase(o);
 };
