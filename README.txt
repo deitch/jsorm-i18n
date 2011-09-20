@@ -26,6 +26,20 @@ To Use in Nodejs:
  npm install jsorm-i18n
  i18n = require('jsorm-i18n');
 
+To test in browser:
+  cd to the root directory
+  launch a local Web server, simplest is "python -m SimpleHTTPServer"
+  open a browser (Firefox is best) to the site http://localhost:8080/test/test.html
+
+To test in nodejs:
+  cd to the root director
+  cd to test/
+  make sure you have the right npm modules installed
+      npm install underscore nodeunit
+  node ./nodetest.js <test test ...>
+      each test is the name of a section to test, e.g. calendar, core, currency, etc. separated by whitespace, or "all" for all
+      the name of a test is a js file in the same directory, formatted as test-*.js
+
 Extensive wiki at http://jsorm.com/wiki
 
 
