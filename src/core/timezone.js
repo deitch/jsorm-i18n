@@ -308,9 +308,7 @@ exports.TimeZone = extend({},function(n,d) {
 							 */
 							if (success) {
 								// this eval is evil, but we want to parse functions, no way to do that in JSON
-								/*jslint evil:true */
-								tzinfo = eval("("+xmlHttp.responseText+")");
-								/*jslint evil:false */
+								tzinfo = JSON.parse(xmlHttp.responseText);
 								zone = tzClass(options.name,tzinfo);
 								zones[options.name] = zone;								
 							}

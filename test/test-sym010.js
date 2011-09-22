@@ -1,12 +1,12 @@
-/*global JSORM */
-testFn.testSym010Calendar = function(T) {
-	var cal;
+/*global JSORM, nodeunit, testFn, testCalImpl */
+testFn.testSym010Calendar = (function() {
+	var refDates, o, years, maxDates;
 
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by sym010.org (Irv Bromberg)
 	//  day of year, week of month, week of year calculated by genRefDates.java
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [							// in Sym010
+	refDates = [							// in Sym010
 		[-214193, -586, 7, 21, 0, 205, 4, 30], // -586, 7, 21
 		[-61387, -168, 12, 5, 3, 340, 1, 49], // -168, 12, 5
 		[-61362, -168, 12, 30, 3, 340, 1, 49], // -168, 12, 30
@@ -45,7 +45,7 @@ testFn.testSym010Calendar = function(T) {
 		[764652, 2094, 7, 21, 0, 199, 3, 29] // 2094, 7, 21
 	];
 
-	var maxDates = [
+	maxDates = [
 		{year:1959,month:1,expect:30},
 		{year:1959,month:2,expect:31},
 		{year:1959,month:3,expect:30},
@@ -120,7 +120,7 @@ testFn.testSym010Calendar = function(T) {
 		{year:1900,month:12,expect:30}
 	];
 
-	var years = [
+	years = [
 		{year: 1900, leap: false, months:12, days: 364},
 		{year: 1901, leap: false, months:12, days: 364},
 		{year: 1960, leap: false, months:12, days: 364},
@@ -141,7 +141,7 @@ testFn.testSym010Calendar = function(T) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(T,"Sym010 Calendar Tests","../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new T.testCase(o);
-};
+	o = testFn.testCalImpl("../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return {"Sym010 Calendar Tests":nodeunit.testCase(o)};
+}());
 

@@ -72,7 +72,7 @@
  * callback is as in getCalendar().
  * @constructor
  */
-var extend = utils.extend, apply = utils.apply, zeropad = utils.zeropad;
+var extend = utils.extend, apply = utils.apply, zeropad = utils.zeropad, loadCode = utils.loadCode;
 exports.calendar = extend({}, (function() {
 
 	// system epoch, relative to RD0
@@ -2002,7 +2002,7 @@ exports.calendar = extend({}, (function() {
 				//   or if we need it get it via ajax
 				if (impls[calendar]) {
 					// we already have it, so just set up the config and make a new one - the result will be handled by the callback
-					calConf = {calendar : impls[calendar](), date: date, zone: zone, locale: locale,
+					calConf = {calendar : impls[calendar], date: date, zone: zone, locale: locale,
 								  basepath: basepath, localePath:localepath, callback: callback, options: opts};
 					calInst = calInit(calConf);
 				} else {
@@ -2012,11 +2012,9 @@ exports.calendar = extend({}, (function() {
 						options = options || {};
 						if (success) {
 							// we have it loaded
-							/*jslint evil:true */
-							impls[options.calendar] = function() {return eval("("+xmlHttp.responseText+")");};
-							/*jslint evil:false */
+							impls[options.calendar] = loadCode(xmlHttp.responseText);
 							try {
-								calConf = {calendar : impls[calendar](), date: options.date, zone: options.zone, 
+								calConf = {calendar : impls[calendar], date: options.date, zone: options.zone, 
 												locale: options.locale, options: options.options,
 											  basepath: options.basepath, localePath: options.localePath, callback: options.callback};
 								calInst = calInit(calConf);

@@ -1,5 +1,5 @@
-/*global JSORM, testFn, nodeunit */
-testFn.testTimeZone = (function() {
+/*global JSORM, testFn */
+testFn.testTimeZone = function(T) {
 	var TZ = JSORM.TimeZone, zones, expectedVersion = "2009u", numZones = 402;
 	// list of zones to test and test inputs and expected outputs
 	// each key is the name of a zone to load and check
@@ -19,7 +19,7 @@ testFn.testTimeZone = (function() {
 	TZ.basepath =  '../';
 	TZ.path = 'build/zoneinfo/';
 	
-	return {"Timezone Tests": nodeunit.testCase({
+	return new T.testCase({
 		/*
 		 * Functions to test timezone functionality.
 		 * These are the tests we want to perform:
@@ -29,27 +29,31 @@ testFn.testTimeZone = (function() {
 		 * 4) Test list of zones length
 		 * 5) Test expected zones are there
 		 */
-		testVersion : function(T) {
+		testVersion : function() {
 			var test = this;
 			TZ.getVersion({callback: function(success,version,options) {
-				T.equal(expectedVersion,version,"Version mismatch");					
-				T.done();
+				test.resume(function(){
+					T.equal(expectedVersion,version,"Version mismatch");					
+				});
 			}});
+			test.wait(3000);
 		},
-		testNumZones : function(T) {
+		testNumZones : function() {
 			var test = this;
 			TZ.getZoneList({callback: function(success,list,options) {
-				var count=0, i;
-				for (i in list.zones) {
-					if (list.zones.hasOwnProperty(i) && typeof(list.zones.i) !== "function") {
-						count++;							
+				test.resume(function(){
+					var count=0, i;
+					for (i in list.zones) {
+						if (list.zones.hasOwnProperty(i) && typeof(list.zones.i) !== "function") {
+							count++;							
+						}
 					}
-				}
-				T.equal(numZones,count,"Wrong number of zones");					
-				T.done();
+					T.equal(numZones,count,"Wrong number of zones");					
+				});
 			}});
+			this.wait(3000);
 		},
-		testZoneEntries : function(T) {
+		testZoneEntries : function() {
 			var test = this, tzZones = {}, list = [], i, count = 0, cb;
 			for (i in zones) {
 				if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
@@ -57,23 +61,25 @@ testFn.testTimeZone = (function() {
 				}
 			}
 			cb = function(success,zone,options) {
-				var i;
 				tzZones[zone.name] = zone;
 				count++;
 				if (count === list.length) {
-					for (i in zones) {
-						if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
-							T.notStrictEqual(tzZones[i],null,"Check zone in list");
-						}
-					}							
-					T.done();
+					test.resume(function() {
+						var i;
+						for (i in zones) {
+							if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
+								T.notNull(tzZones[i],"Check zone in list");
+							}
+						}							
+					});
 				}
 			};
 			for (i=0;i<list.length;i++) {
 				TZ.getZone({name: list[i],callback: cb});		
 			}
+			this.wait(3000);
 		},
-		testTimes : function(T) {
+		testTimes : function() {
 			var test = this, tzZones = {}, list = [], i, count = 0, cb;
 			for (i in zones) {
 				if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
@@ -81,34 +87,36 @@ testFn.testTimeZone = (function() {
 				}
 			}
 			cb = function(success,zone,options) {
-				var tz,info,infoStr,d,message,expect, i, j;
 				tzZones[zone.getName()] = zone;
 				count++;
 				if (count === list.length) {
-					// check several during midsummer and midwinter
-					// New York
-					for (i in zones) {
-						if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
-							tz = tzZones[i];
-							for (j in zones[i]) {
-								if (zones[i].hasOwnProperty(j) && typeof(zones[i][j] !== "function")) {
-									message = zones[i][j][0];
-									expect = zones[i][j][1];
-									d = zones[i][j][2].split(',');
-									info = tz.getZoneInfo(parseInt(d[0],10),parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10),parseInt(d[4],10),parseInt(d[5],10));
-									infoStr = info.offset+':'+info.isDst+':'+info.abbr;
-									T.equal(expect,infoStr,message+":"+i);											
+					test.resume(function() {
+						var tz,info,infoStr,d,message,expect, i, j;
+						// check several during midsummer and midwinter
+						// New York
+						for (i in zones) {
+							if (zones.hasOwnProperty(i) && typeof(zones[i]) !== "function") {
+								tz = tzZones[i];
+								for (j in zones[i]) {
+									if (zones[i].hasOwnProperty(j) && typeof(zones[i][j] !== "function")) {
+										message = zones[i][j][0];
+										expect = zones[i][j][1];
+										d = zones[i][j][2].split(',');
+										info = tz.getZoneInfo(parseInt(d[0],10),parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10),parseInt(d[4],10),parseInt(d[5],10));
+										infoStr = info.offset+':'+info.isDst+':'+info.abbr;
+										T.equal(expect,infoStr,message+":"+i);											
+									}
 								}
 							}
-						}
-					}
-					T.done();			
+						}							
+					});
 				}
 			};
 			for (i=0;i<list.length;i++) {
 				TZ.getZone({name: list[i],callback: cb});					
 				
 			}
+			this.wait(3000);
 		}
-	})};
-}());
+	});
+};

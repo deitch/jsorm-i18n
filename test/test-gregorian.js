@@ -1,13 +1,12 @@
-/*global JSORM */
-testFn.testGregorianCalendar = function(T) {
-	var cal;
-	var retText = null;
+/*global JSORM, testFn, nodeunit, testCalImpl */
+testFn.testGregorianCalendar = (function() {
+	var cal, retText = null, refDates, maxDates, years, o;
 
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
 	//  day of year, week of month, week of year calculated by genRefDates.java
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [
+	refDates = [
 		[-214193, -586, 7, 24, 0, 205, 4, 30],
 		[-61387, -168, 12, 5, 3, 340, 1, 49],
 		[25469, 70, 9, 24, 3, 267, 4, 39],
@@ -43,7 +42,7 @@ testFn.testGregorianCalendar = function(T) {
 		[764652, 2094, 7, 18, 0, 199, 3, 29]
 	];
 
-	var maxDates = [
+	maxDates = [
 		{year:2000,month:1,expect:31},
 		{year:2000,month:2,expect:29},
 		{year:2000,month:3,expect:31},
@@ -82,7 +81,7 @@ testFn.testGregorianCalendar = function(T) {
 		{year:1900,month:12,expect:31}
 	];
 
-	var years = [
+	years = [
 		{year: 1900, leap: false, months:12,days: 365},
 		{year: 1901, leap: false, months:12,days: 365},
 		{year: 1960, leap: true, months:12,days: 366},
@@ -98,7 +97,7 @@ testFn.testGregorianCalendar = function(T) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(T,"Gregorian Calendar Tests","../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new T.testCase(o);	
-};
+	o = testFn.testCalImpl("../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return {"Gregorian Calendar Tests": nodeunit.testCase(o)};
+}());
 

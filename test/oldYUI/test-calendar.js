@@ -1,14 +1,14 @@
-/*global JSORM, testFn, nodeunit, console */
-testFn.testCalendar = (function() {
+/*global JSORM, testFn */
+testFn.testCalendar = function(T) {
 	// centralize all of these calls
-	var C = JSORM.calendar, TZ = JSORM.TimeZone, epochDays, millisHour, millisDay, formatTests, isoWeekDates, weeksTests, conf;
+	var C = JSORM.calendar, TZ = JSORM.TimeZone;
 
 	// test bundles: [rd,m,y,d,dow]
-	epochDays = 719163;
-	millisHour = 1000*3600;
-	millisDay = millisHour*24;
+	var epochDays = 719163;
+	var millisHour = 1000*3600;
+	var millisDay = millisHour*24;
 	
-	formatTests = [
+	var formatTests = [
 		// Java tests
 		['yy-MM-dd',C.JAVA,'69-12-31','70-01-01','70-01-01'],
 		['yyyy-MM-dd',C.JAVA,'1969-12-31','1970-01-01','1970-01-01'],
@@ -43,7 +43,7 @@ testFn.testCalendar = (function() {
 	];
 	// list of test dates [y,m,d,dayOfYear,ISOWeek,ISOYear]
 	// provided by genIsoWeeks.rb
-	isoWeekDates = [
+	var isoWeekDates = [
 		[1940,3,10,70,0,10,1940],
 		[1940,3,11,71,1,11,1940],
 		[1940,3,14,74,4,11,1940],
@@ -223,7 +223,7 @@ testFn.testCalendar = (function() {
 	];
 	
 	//[RD , Year , Month , Date ,  MinDaysInWeek , FirstDayOfWeek , DayOfYear , WeekOfMonth , WeekOfYear]
-	weeksTests = [
+	var weeksTests = [
 		[-214193, -586, 7, 24, 1, 0, 205, 5, 31],
 		[-214193, -586, 7, 24, 1, 1, 205, 4, 30],
 		[-214193, -586, 7, 24, 1, 2, 205, 4, 30],
@@ -1843,7 +1843,7 @@ testFn.testCalendar = (function() {
 		[764652, 2094, 7, 18, 7, 6, 199, 3, 29]
 	];
 
-	conf = {
+	var conf = {
 		est : {time: 7200000, zone: 'GMT-05:00'},
 		gmt : {time: 3600000, zone: 'GMT+00:00'},
 		blank : {time: 7200000, zone: null},
@@ -1856,26 +1856,25 @@ testFn.testCalendar = (function() {
 	}
 
 	function setUpCalendar(cal,callback) {
-		var cb, cb2, basepath = '../', calpath = 'src/calendars/', localePath = 'test/core/', locale = 'en_US', config, zone;
-		
-		zone = conf[cal].zone;
-		cb2 = function(success,calInst,options,e) {
+		var cb2 = function(success,calInst,options,e) {
 			calInst.myname = cal;
 			callback(success,calInst,options,e);
-		};
-		cb = function(success,zone,options) {
+		}
+		var cb = function(success,zone,options) {
 			if (success) {
 				options.config.zone = zone;
 				C.getCalendar(options.config);
 			}
 		};
-		config = {locale: locale, callback: cb2, basePath: basepath, localePath: localePath, calendarPath: calpath};
-		config.date = new Date(conf[cal].time);
 
+		var basepath = '../', calpath = 'src/calendars/', localePath = 'test/core/', locale = 'en_US';
+		var config = {locale: locale, callback: cb2, basePath: basepath, localePath: localePath, calendarPath: calpath};
+		config.date = new Date(conf[cal].time);
+		
+		var zone = conf[cal].zone;
 
 		TZ.basepath =  '../';
-		//TZ.path = 'zonebuild/';
-		TZ.path = 'build/zoneinfo/';
+		TZ.path = 'zonebuild/';
 		
 		switch (cal) {
 			case 'gmt':
@@ -1892,38 +1891,53 @@ testFn.testCalendar = (function() {
 		}
 	}
 
-	return {
-		"Calendar tests": nodeunit.testCase({
-			/*
-			 * Functions to test calendar functionality.
-			 * These are the tests we want to perform:
-			 * 1) getCalendar - gregorian gets gregorian, blank gets default (gregorian)
-			 * 2) format - format its date - various dates and formats, including PHP, JAVA, STRFTIME, DEFAULT
-			 * 3) date/time/dateTime - standard formats in default style
-			 * 4) get - generic as well as specific fields (getYear, getMonth, etc.)
-			 * 5) set - generic as well as specific fields (setYear, setMonth, etc.)
-			 * 6) get/set with changing field or time and then seeing if recalculate works
-			 * 7) set with changing field beyond maximum amount and seeing if recalc works
-			 * 8) setLocale - check setting with and without available library, default, and do formatting
-			 * 9) add - check that it properly recalculates; do both in a field as well as affecting multiple fields (increment & decrement)
-			 * 10) roll - check that it properly recalculates; do both in a field as well as affecting multiple (incr & decr)
-			 *       roll SHOULD NOT affect any other larger fields
-			 */
-			testGet : function(T) {
-				var tests, count = 0, calendars = {}, test = this, expect, output, field, cb, i;
-				tests = [
-					['MONTH',12,1,1],
-					['DATE',31,1,1],
-					['YEAR',1969,1970,1970]
-				];
-				cb = function(success,calInst,options,e) {
-					// increment the count
-					count++;
-					// save the particular calendar
-					calendars[calInst.myname] = calInst;
-					// when we have three calendars, we can do our tests
-					if (count === 3) {
-						for (i=0;i<tests.length; i++) {
+	return new T.testCase({
+		name : "Calendar tests",
+		_should: { 
+			ignore: { 
+				testGet: false,
+				testSet: false,
+				testSetOverdrive: false,
+				testAdd: false,
+				testRoll: false,
+				testFormat: false,
+				testWeekCount: false,
+				testIsoWeekCount: false
+			} 
+		},
+
+		/*
+		 * Functions to test calendar functionality.
+		 * These are the tests we want to perform:
+		 * 1) getCalendar - gregorian gets gregorian, blank gets default (gregorian)
+		 * 2) format - format its date - various dates and formats, including PHP, JAVA, STRFTIME, DEFAULT
+		 * 3) date/time/dateTime - standard formats in default style
+		 * 4) get - generic as well as specific fields (getYear, getMonth, etc.)
+		 * 5) set - generic as well as specific fields (setYear, setMonth, etc.)
+		 * 6) get/set with changing field or time and then seeing if recalculate works
+		 * 7) set with changing field beyond maximum amount and seeing if recalc works
+		 * 8) setLocale - check setting with and without available library, default, and do formatting
+		 * 9) add - check that it properly recalculates; do both in a field as well as affecting multiple fields (increment & decrement)
+		 * 10) roll - check that it properly recalculates; do both in a field as well as affecting multiple (incr & decr)
+		 * 			roll SHOULD NOT affect any other larger fields
+		 */
+		testGet : function() {
+			var tests = [
+				['MONTH',12,1,1],
+				['DATE',31,1,1],
+				['YEAR',1969,1970,1970]
+			];
+			var count = 0, calendars = {}, test = this; 
+			var expect, output, field;
+			var cb = function(success,calInst,options,e) {
+				// increment the count
+				count++;
+				// save the particular calendar
+				calendars[calInst.myname] = calInst;
+				// when we have three calendars, we can do our tests
+				if (count == 3) {
+					test.resume(function(){
+						for (var i=0;i<tests.length; i++) {
 							field = tests[i][0];
 							expect = tests[i][1];
 							output = calendars.est.get(field);
@@ -1955,18 +1969,21 @@ testFn.testCalendar = (function() {
 						T.equal(1,output,"ist month");
 						output = calendars.ist.getDate();
 						T.equal(1,output,"ist date");
-						T.done();
-					}
-				};
-				setUpCalendar('est',cb);
-				setUpCalendar('gmt',cb);
-				setUpCalendar('ist',cb);
-			},
-			testSet : function(T) {
-				var test = this, cb;
-				cb = function(success,calInst,options,e) {
+					});
+				}
+			};
+			setUpCalendar('est',cb);
+			setUpCalendar('gmt',cb);
+			setUpCalendar('ist',cb);
+			this.wait(3000);
+		},
+		testSet : function() {
+			var test = this;
+			var cb = function(success,calInst,options,e) {
+				test.resume(function(){
 					// [rd,yr,month,date,dow,doy,wom,woy]
-					var tests = [727274, 1992, 3, 17, 2, 77], expect, output, c = calInst;
+					var tests = [727274, 1992, 3, 17, 2, 77];
+					var expect, output, c = calInst;
 					resetCalendar(c);
 					c.setYear(tests[1]);
 					c.setMonth(tests[2]);
@@ -1976,7 +1993,7 @@ testFn.testCalendar = (function() {
 					T.equal(expect,output,"GMT y:m:d");
 
 					// what is the expected time in milliseconds?
-					expect = (tests[0]-epochDays)*millisDay+millisHour;
+					expect = (tests[0]-epochDays)*millisDay+1*millisHour;
 					output = c.getTime();
 					T.equal(expect,output,"GMT millis");
 
@@ -1984,16 +2001,19 @@ testFn.testCalendar = (function() {
 					expect = tests.slice(4).join(':');
 					output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
 					T.equal(expect,output,"dayOfWeek:dayOfYear");
-					T.done();
-				};
-				setUpCalendar('gmt',cb);
-			},
-			testSetOverdrive : function(T) {
-				var test = this, cb;
-				cb = function(success,calInst,options,e) {
+				});
+			};
+			setUpCalendar('gmt',cb);
+			this.wait(3000);
+		},
+		testSetOverdrive : function() {
+			var test = this;
+			var cb = function(success,calInst,options,e) {
+				test.resume(function(){
 					// test setting a date that is absurd, the 32nd day of March, which should become the first day of April
 					// [rd,yr,month,date,dow,doy,wom,woy]
-					var tests = [727289, 1992, 3, 32, 3, 92], expect, output, c = calInst;
+					var tests = [727289, 1992, 3, 32, 3, 92];
+					var expect, output, c = calInst;
 					c.setYear(tests[1]);
 					c.setMonth(tests[2]);
 					c.setDate(tests[3]);
@@ -2002,7 +2022,7 @@ testFn.testCalendar = (function() {
 					T.equal(expect,output,"GMT y:m:d");
 
 					// what is the expected time in milliseconds?
-					expect = (tests[0]-epochDays)*millisDay+millisHour;
+					expect = (tests[0]-epochDays)*millisDay+1*millisHour;
 					output = c.getTime();
 					T.equal(expect,output,"GMT millis");
 
@@ -2010,22 +2030,27 @@ testFn.testCalendar = (function() {
 					expect = tests.slice(4).join(':');
 					output = [c.getDayOfWeek(),c.getDayOfYear()].join(':');
 					T.equal(expect,output,"dayOfWeek:dayOfYear");		
-					T.done();
-				};
-				setUpCalendar('gmt',cb);
-			},
-			testAdd : function(T) {
-				var count = 0, calendars = {}, test = this, cb;
-				cb = function(success,calInst,options,e) {
-					var h, tests = [727274, 1992, 3, 17, 2, 77], addDays = 15,
-					expect, output, outInfo, c = calendars.gmt;
-					// increment the count
-					count++;
-					// save the particular calendar
-					calendars[calInst.myname] = calInst;
-					// when we have three calendars, we can do our tests
-					if (count === 2) {
+				});
+			};
+			setUpCalendar('gmt',cb);
+			this.wait(3000);
+		},
+		testAdd : function() {
+			var count = 0, calendars = {}, test = this;
+			var cb = function(success,calInst,options,e) {
+				// increment the count
+				count++;
+				// save the particular calendar
+				calendars[calInst.myname] = calInst;
+				// when we have three calendars, we can do our tests
+				if (count == 2) {
+					test.resume(function(){
 						// [rd,yr,month,date,dow,doy,wom,woy]
+						var tests = [727274, 1992, 3, 17, 2, 77];
+						var addDays = 15;
+
+						// first we do just the date
+						var expect, output, outInfo, c = calendars.gmt;
 						c.setYear(tests[1]);
 						c.setMonth(tests[2]);
 						c.setDate(tests[3]);
@@ -2043,7 +2068,7 @@ testFn.testCalendar = (function() {
 						T.equal(expect,output,"post-add y:m:d");
 
 						// what is the expected time in milliseconds?
-						expect = (outInfo[0])*millisDay+millisHour;
+						expect = (outInfo[0])*millisDay+1*millisHour;
 						output = c.getTime();
 						T.equal(expect,output,"millis post-add");
 
@@ -2089,7 +2114,7 @@ testFn.testCalendar = (function() {
 						 */
 
 						// first the basic output
-						h = calendars.hebrew;
+						var h = calendars.hebrew;
 						outInfo = [5730,10,23];
 						expect = outInfo.join(':');
 						output = [h.getYear(),h.getMonth(),h.getDate()].join(':');
@@ -2124,23 +2149,26 @@ testFn.testCalendar = (function() {
 
 						// reset the calendar
 						resetCalendar(h);
-						T.done();
-					}
-				};
-				setUpCalendar('gmt',cb);
-				setUpCalendar('hebrew',cb);
-			},
-			testRoll : function(T) {
-				var count = 0, calendars = {}, test = this, cb;
-				cb = function(success,calInst,options,e) {
-					var tests = [727274, 1992, 3, 17, 2, 77], expect, output, outInfo, c = calendars.gmt, addDays = 15, h;
-					// increment the count
-					count++;
-					// save the particular calendar
-					calendars[calInst.myname] = calInst;
-					// when we have three calendars, we can do our tests
-					if (count === 2) {
+					});
+				}
+			};
+			setUpCalendar('gmt',cb);
+			setUpCalendar('hebrew',cb);
+			this.wait(3000);
+		},
+		testRoll : function() {
+			var count = 0, calendars = {}, test = this;
+			var cb = function(success,calInst,options,e) {
+				// increment the count
+				count++;
+				// save the particular calendar
+				calendars[calInst.myname] = calInst;
+				// when we have three calendars, we can do our tests
+				if (count == 2) {
+					test.resume(function(){
 						// [rd,yr,month,date,dow,doy,wom,woy]
+						var tests = [727274, 1992, 3, 17, 2, 77];
+						var expect, output, outInfo, c = calendars.gmt;
 
 						c.setYear(tests[1]);
 						c.setMonth(tests[2]);
@@ -2148,6 +2176,7 @@ testFn.testCalendar = (function() {
 						expect = tests.slice(1,4).join(':');
 						output = [c.getYear(),c.getMonth(),c.getDate()].join(':');
 						T.equal(expect,output,"GMT pre-roll y:m:d");
+						var addDays = 15;
 						c.roll('DATE',addDays);
 
 						// expected outcomes
@@ -2157,7 +2186,7 @@ testFn.testCalendar = (function() {
 						T.equal(expect,output,"post-roll y:m:d");
 
 						// what is the expected time in milliseconds?
-						expect = (outInfo[0])*millisDay+millisHour;
+						expect = (outInfo[0])*millisDay+1*millisHour;
 						output = c.getTime();
 						T.equal(expect,output,"millis");
 
@@ -2201,7 +2230,7 @@ testFn.testCalendar = (function() {
 						 */
 
 						// first the basic output
-						h = calendars.hebrew;
+						var h = calendars.hebrew;
 						outInfo = [5730,10,23,1,0];
 						expect = outInfo.join(':');
 						output = [h.getYear(),h.getMonth(),h.getDate(),h.getHour(),h.getMinute()].join(':');
@@ -2221,29 +2250,32 @@ testFn.testCalendar = (function() {
 
 						// reset the calendar
 						resetCalendar(h);
-						T.done();
-					}
-				};
-				setUpCalendar('gmt',cb);
-				setUpCalendar('hebrew',cb);
-			},
+					});
+				}
+			};
+			setUpCalendar('gmt',cb);
+			setUpCalendar('hebrew',cb);
+			this.wait(3000);
+		},
 
-			testFormat : function(T) {
-				var count = 0, calendars = {}, test = this, cb; 
-				cb = function(success,calInst,options,e) {
-					var tests = formatTests, format,style,expect,output, i;
-					// increment the count
-					count++;
-					// save the particular calendar
-					calendars[calInst.myname] = calInst;
-					// when we have three calendars, we can do our tests
-					if (count === 3) {
+		testFormat : function() {
+			var count = 0, calendars = {}, test = this; 
+			var cb = function(success,calInst,options,e) {
+				// increment the count
+				count++;
+				// save the particular calendar
+				calendars[calInst.myname] = calInst;
+				// when we have three calendars, we can do our tests
+				if (count == 3) {
+					test.resume(function(){
 						// each test is: [format,style,expect_est,expect_gmt,expect_ist]
 						// actual times for each Calendar in local time
 						// gmt: 01:00:00 1 January 1970 CE
 						// est: 21:00:00 31 December 1969 CE
 						// ist: 01:00:00 1 January 1970 CE
-						for (i=0;i<tests.length;i++) {
+						var tests = formatTests;
+						var format,style,expect,output;
+						for (var i=0;i<tests.length;i++) {
 							format = tests[i][0];
 							style = tests[i][1];
 							expect = tests[i][2];
@@ -2259,25 +2291,28 @@ testFn.testCalendar = (function() {
 							//console.log("IST %s style %s expect %s got %s",format,style,expect,output);
 							T.equal(expect,output,"IST "+format+' '+style);
 						}
-						T.done();
-					}
-				};
-				setUpCalendar('est',cb);
-				setUpCalendar('gmt',cb);
-				setUpCalendar('ist',cb);
-			},
+					});
+				}
+			};
+			setUpCalendar('est',cb);
+			setUpCalendar('gmt',cb);
+			setUpCalendar('ist',cb);
+			this.wait(3000);
+		},
 
-			testWeekCount : function(T) {
-				var test = this, cb;
-				cb = function(success,calInst,options,e) {
-					var weeks = weeksTests, expect, o, message, testDate, i, cal;
+		testWeekCount : function() {
+			var test = this;
+			var cb = function(success,calInst,options,e) {
+				test.resume(function(){
+					var weeks = weeksTests;
+					var expect, o, message, testDate;
 					// d = day of period, f = first day of week, m = mindays in week
 
-					cal = calInst;
+					var cal = calInst;
 					resetCalendar(cal);
 
 					//[RD , Year , Month , Date ,  MinDaysInWeek , FirstDayOfWeek , DayOfYear, WeekOfMonth , WeekOfYear]
-					for (i=0; i<weeks.length; i++) {
+					for (var i=0; i<weeks.length; i++) {
 						resetCalendar(cal);
 						testDate = weeks[i];
 						cal.setYear(testDate[1]);
@@ -2290,22 +2325,27 @@ testFn.testCalendar = (function() {
 						message = "y/m/d/min/first "+ testDate.slice(1,6).join('/');
 						T.equal(expect,o,message);
 					}
-					T.done();
-				};
-				setUpCalendar('gmt',cb);
-			},
+				});
+			};
+			setUpCalendar('gmt',cb);
+			this.wait(3000);
+		},
 
-			/*
-			 * NEW STUFF TO WORK
-			 */
-			testIsoWeekCount : function(T) {
-				var test = this, cb;
-				cb = function(success,calInst,options,e) {
+		/*
+		 * NEW STUFF TO WORK
+		 */
+		testIsoWeekCount : function() {
+			var test = this;
+			var cb = function(success,calInst,options,e) {
+				test.resume(function(){
 					// test dates [y,m,d,dayOfYear,ISOWeek,ISOYear]
-					var message, expect, o, dates = isoWeekDates, header = 'y:m:d:doy:dow ', cal = calInst, i;
+					var message, expect, o;
+					var dates = isoWeekDates;
+					var header = 'y:m:d:doy:dow ';
+					var cal = calInst;
 					resetCalendar(cal);
 
-					for (i in dates) {
+					for (var i in dates) {
 						if (dates.hasOwnProperty(i) && typeof(dates[i]) !== "function") {
 							cal.setYear(dates[i][0]);
 							cal.setMonth(dates[i][1]);
@@ -2316,11 +2356,11 @@ testFn.testCalendar = (function() {
 							T.equal(expect,o,message);							
 						}
 					}
-					T.done();
-				};
-				setUpCalendar('gmt',cb);
-			}	
+				});
+			};
+			setUpCalendar('gmt',cb);
+			this.wait(3000);
+		}	
 		
-		})
-	};
-}());
+	});
+};

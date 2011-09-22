@@ -1,87 +1,38 @@
 <html>
 	<head>
 		<title>jsorm i18n Test Application</title>
-		<script src="http://yui.yahooapis.com/3.3.0/build/yui/yui-min.js"></script> 
 		<script src="jsorm.js"></script>
 		<script src="jsorm-i18n-src.js"></script>
+		<script src="../node_modules/nodeunit/dist/browser/nodeunit.js"></script>
 		<!-- holder for calendar implementation tests -->
 		<script type="text/javascript">
 			var tests = [
 				"ALL","Calendar","Currency","ResourceBundle","TimeZone",
 				"Gregorian Calendar","Julian Calendar","Hebrew Calendar","Islamic Calendar","Sym454 Calendar","Sym010 Calendar"
-			],calImplTests = [], testFn = {
-				testALL: function(Y) {
-					var i, suite, testName;
-					// run all of them except myself
-					suite = new Y.Test.Suite("ALL Tests");
-					for (i=0;i<tests.length;i++) {
-						testName = "test"+tests[i].charAt(0).toUpperCase() + tests[i].slice(1);
-						testName = testName.replace(/\s+/g,"");
-						if (testName !== "testALL" && testFn && testFn[testName]) {
-							suite.add(testFn[testName](Y));
-						}
-					}
-					return suite;
-				}
-			};
+			], testFn = {};
 		</script>
 
-		<script src="test-calendar.js"></script>
 		<script src="test-currency.js"></script>
-		<script src="test-resourcebundle.js"></script>
 		<script src="test-timezone.js"></script>
-		
-		<!--  test-cal-impl has the test generating function for the specific calendar plugins -->
+		<script src="test-calendar.js"></script>
+		<script src="test-resourcebundle.js"></script>
+
 		<script src="test-cal-impl.js"></script>
-		<!--  the following actually perform tests for individual calendars -->
 		<script src="test-gregorian.js"></script>
-		<script src="test-julian.js"></script>
 		<script src="test-hebrew.js"></script>
 		<script src="test-islamic.js"></script>
-		<script src="test-sym454.js"></script>
+		<script src="test-julian.js"></script>
 		<script src="test-sym010.js"></script>
-		<!-- end of actual tests for individual calendars -->
+		<script src="test-sym454.js"></script>
 		
 		<script type="text/javascript">
-			/*global YUI */
-			// important to convert Y to generic testing, so we can abstract out
-			var makeDriver = function(Y){
-				return {
-					equal: Y.Assert.areEqual,
-					notNull: Y.Assert.isNotNull,
-					isNull: Y.Assert.isNull,
-					testCase: Y.Test.Case,
-					testSuite: Y.Test.Suite
-				};
-			};
+			/*global nodeunit */
 			function go(test) {
-				var local = false, conf, f;
-				conf = {
-					base: 'yui/'
-				};
-				f = (function() {
-					return function(Y) {
-						var i, list, yconsole, driver = makeDriver(Y);
-						if (test !== null) {
-							Y.Test.Runner.add(test(driver));							
-						} else {
-							for (i=0;i<tests.length;i++) {
-								if (tests[i].fn !== null) {
-									Y.Test.Runner.add(tests[i].fn(driver));																
-								}
-							}
-						}
-						//Y.config.useBrowserConsole = true;
-						
-						yconsole = new Y.Console({ 
-							boundingBox: '#basic',
-							newestOnTop: false                    
-						}).render('#results');	
-
-						Y.Test.Runner.run();						
-					};
-				}());
-				YUI().use("test","console",f);
+				var local = false, conf, f, i, list, opts = {div:document.getElementById("results")};
+				if (test === null || test === undefined) {
+					test = testFn;
+				}
+				nodeunit.run(test,opts);
 				return(false);
 			}
 			function init() {
@@ -99,7 +50,7 @@
 					ul.appendChild(li);
 					testName = "test"+tests[i].charAt(0).toUpperCase() + tests[i].slice(1);
 					testName = testName.replace(/\s+/g,"");
-					if (testFn && testFn[testName]) {
+					if (testName === "testALL" || (testFn && testFn[testName])) {
 						fn = testFn[testName];
 						a = document.createElement('a');
 						li.appendChild(a);

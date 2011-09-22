@@ -8,7 +8,8 @@
 /*global module,exports,require */
 var JSORM;
 // are we running on node with require or the global JSORM?
-if (typeof require !== "undefined") {
+var isNode = typeof module !== "undefined" && typeof module.exports !== "undefined" && typeof require !== "undefined" && typeof(require) === "function";
+if (isNode) {
 	JSORM = require('jsorm-utilities');
 } else {
 	JSORM = exports;
@@ -28,7 +29,7 @@ var utils = {
 	getFile : function(fileName,callback,options) {
 		var fs;
 		// need to determine if we are running in node or on a client-side
-		if (typeof module !== "undefined" && typeof module.exports !== "undefined" && typeof require !== "undefined" && typeof(require) === "function") {
+		if (isNode) {
 			fs = require('fs');
 			fs.readFile(fileName,function(err,data){
 				var xmlHttp = {}, success;
@@ -37,15 +38,38 @@ var utils = {
 					xmlHttp.responseCode = 404;
 					success = false;
 				} else {
-					xmlHttp.responseText = null;
+					xmlHttp.responseText = data.toString();
 					xmlHttp.responseCode = 200;
 					success = true;
 				}
-				callback(fileName,xmlHttp,true,options);
+				callback(fileName,xmlHttp,success,options);
 			});
 		} else {
 			JSORM.ajax({url: fileName, callback: callback, options: options});
 		}
+	},
+	loadCode: function(code) {
+		var results, vm, sandbox;
+		// need to set up environment properly
+		if (isNode) {
+			vm = require('vm');
+			sandbox = {
+				JSORM: utils.apply(JSORM,exports),
+				module: {exports: {}}
+			};
+			sandbox.exports = module.exports;
+			vm.runInNewContext(code,sandbox);
+			results = sandbox.module.exports;
+		} else {
+			/*jslint evil:true */
+			(function(){
+				var module = {exports: {}}, exports = module.exports;
+				eval(code);
+				results = module.exports;
+			}());
+			/*jslint evil:false */
+		}
+		return(results);
 	},
 	apply: JSORM.apply,
 	extend: JSORM.extend,

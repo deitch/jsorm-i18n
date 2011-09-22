@@ -1,12 +1,11 @@
-/*global JSORM */
-testFn.testJulianCalendar = function(T) {
-	var cal;
-	var retText = null;
+/*global JSORM, nodeunit, testFn, testCalImpl */
+testFn.testJulianCalendar = (function() {
+	var refDates, o, years, maxDates;
 
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [
+	refDates = [
 		[-214193, -587, 7, 30, 0],
 		[-61387, -169, 12, 8, 3],
 		[25469, 70, 9, 26, 3],
@@ -42,7 +41,7 @@ testFn.testJulianCalendar = function(T) {
 		[764652, 2094, 7, 5, 0]
 	];
 
-	var maxDates = [
+	maxDates = [
 		{year:2000,month:1,expect:31},
 		{year:2000,month:2,expect:29},
 		{year:2000,month:3,expect:31},
@@ -81,7 +80,7 @@ testFn.testJulianCalendar = function(T) {
 		{year:1900,month:12,expect:31}
 	];
 
-	var years = [
+	years = [
 		{year: 1900, leap: true, months: 12, days: 366},
 		{year: 1901, leap: false, months: 12, days: 365},
 		{year: 1960, leap: true, months: 12, days: 366},
@@ -97,7 +96,7 @@ testFn.testJulianCalendar = function(T) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(T,"Julian Calendar Tests","../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new T.testCase(o);
-};
+	o = testFn.testCalImpl("../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return {"Julian Calendar Tests": nodeunit.testCase(o)};
+}());
 

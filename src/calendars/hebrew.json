@@ -1,3 +1,4 @@
+/*global module,JSORM, exports */
 /**
  * @class HebrewCalendar is an object-literal that implements the necessary implementation contract for a CalendarImpl.
  * Please note that this calendar does not calculate when sunset/nightfall occurs, the time of day switching in the Hebrew
@@ -7,29 +8,105 @@
  * @name JSORM.HebrewCalendar
  * @static
  */
+
+var defaultLocaleInfo, roshHashanah, rhDay = {}, RD0_DAYS = -1373427, parts, daysBefore, daysBeforeYear, delays, delayRoshHashanah;
+/**
+ * Default locale info
+ * @private
+ */
+defaultLocaleInfo = {
+	SUNDAY : 'Sunday:Sun', MONDAY: 'Monday:Mon', TUESDAY: 'Tuesday:Tue', WEDNESDAY: 'Wednesday:Wen',
+	THURSDAY: 'Thursday:Thu', FRIDAY: 'Friday:Fri', SATURDAY: 'Saturday:Sat',
+	JANUARY: 'Nisan', FEBRUARY: 'Iyar', MARCH: 'Sivan', APRIL: 'Tamuz', MAY: 'Av',
+	JUNE: 'Elul', JULY: 'Tishrei', AUGUST: 'Cheshvan', SEPTEMBER: 'Kislev', 
+	OCTOBER: 'Tevet', NOVEMBER: 'Shevat', DECEMBER: 'Adar', UNDECIMBER: 'Adar II',
+	AM: 'AM', PM: 'PM', ERA0: '', ERA1: '', COUNT0: 'th', COUNT1: 'st', COUNT2: 'nd', COUNT3: 'rd',
+	COUNT21: 'st', COUNT22: 'nd', COUNT23: 'rd', COUNT31: 'st', COUNTN: 'th'
+};
+
+// parts (chalakim) in an hour
+parts = {
+	minute : 1080 / 60,
+	sec : 1080 / (60*60),
+	hour : 1080,
+	day : 1080 * 24,
+	molad_month : 29.5*25920 + 793,
+	molad_1_noon_offset : (1080*24)/2 - 876,
+	molad_1_midnight_offset : 876,
+	molad : 25920/2 + 793
+};
+
+
+
+/**
+ * Private function to determine the RD date of Rosh Hashanah, using the days before and delay private functions
+ * @private
+ */
+roshHashanah = function(y) {
+	if (!rhDay[y]) {
+		rhDay[y] = RD0_DAYS + daysBeforeYear(y) + delayRoshHashanah(y)+1;
+	}
+	return(rhDay[y]);
+};
+/**
+ * Private function to return how many days are prior to a given year
+ * @private
+ */
+daysBefore = {};
+daysBeforeYear = function(y) {
+	// first see if it was cached
+	var months, p, day;
+	if (!daysBefore[y]) {
+		// determine the day based on the months since the beginning of the calendar multiplied by the length of each month
+		// ideally, day = molad(this.TISHREI,y)
+		// however, this can get close to overrunning 32-bit, which many computers still operate on, so we do it separately
+		months = Math.floor((235*y-234)/19);
+		p = parts.molad_1_noon_offset + parts.molad*months;
+		day = 29*months + Math.floor(p/parts.day);
+	
+		// account for the fact that Rosh Hashanah cannot be Sun/Wed/Fri
+		if ((3*(day+1))%7 < 3) {
+			day = day+1;
+		}
+		daysBefore[y] = day-1;
+	}
+	return(daysBefore[y]);
+};
+/**
+ * Private function to determine how much we delay Rosh Hashanah for a given year
+ * @private
+ */
+delays = {};
+delayRoshHashanah = function(y) {
+	// we need to know how many days are before last year, this year and next year
+	var lastYear = daysBeforeYear(y-1), thisYear = daysBeforeYear(y), nextYear = daysBeforeYear(y+1), delay;
+
+	// by default, there is no special delay, unless this year is too long or last year is too short
+	delay = 0;
+	if (nextYear - thisYear === 356) {
+		// this coming year will be too long, so we delay RH two days to shorten it
+		delay = 2;
+	} else if (thisYear - lastYear === 382) {
+		// last year was too short, so we delay RH one day to lengthen it
+		delay = 1;
+	}
+	return(delay);
+};
+
+
+
+
 /** @scope JSORM.HebrewCalendar.prototype */ 
-{
+module.exports = {
 	getName : function(){return("hebrew");},
 	getStartOfDay : function(){return(JSORM.calendar.SUNSET);},
 	// first date of Hebrew calendar relative to RD0
-	RD0_DAYS : -1373427,
+	RD0_DAYS : RD0_DAYS,
 	DAYS_IN_SOLAR_YEAR : 365.25,
 	MOLAD_1_OFFSET_MIDNIGHT_DAYS : 876 / (1080 * 24),
 	// each molad is offset from its previous by 29d, 12h and 793parts
 	MOLAD_STD_OFFSET_DAYS : 29.5 + 793/25920,
 	TISHREI : 7,
-
-	// parts (chalakim) in an hour
-	parts : {
-		minute : 1080 / 60,
-		sec : 1080 / (60*60),
-		hour : 1080,
-		day : 1080 * 24,
-		molad_month : 29.5*25920 + 793,
-		molad_1_noon_offset : (1080*24)/2 - 876,
-		molad_1_midnight_offset : 876,
-		molad : 25920/2 + 793
-	},
 
 	/**
 	 * Default locale is English US
@@ -37,20 +114,7 @@
 	 */
 	getDefaultLocale: function(){return('en_US');},
 
-	/**
-	 * Default locale info
-	 * @private
-	 */
-	_defaultLocaleInfo : {
-		SUNDAY : 'Sunday:Sun', MONDAY: 'Monday:Mon', TUESDAY: 'Tuesday:Tue', WEDNESDAY: 'Wednesday:Wen',
-		THURSDAY: 'Thursday:Thu', FRIDAY: 'Friday:Fri', SATURDAY: 'Saturday:Sat',
-		JANUARY: 'Nisan', FEBRUARY: 'Iyar', MARCH: 'Sivan', APRIL: 'Tamuz', MAY: 'Av',
-		JUNE: 'Elul', JULY: 'Tishrei', AUGUST: 'Cheshvan', SEPTEMBER: 'Kislev', 
-		OCTOBER: 'Tevet', NOVEMBER: 'Shevat', DECEMBER: 'Adar', UNDECIMBER: 'Adar II',
-		AM: 'AM', PM: 'PM', ERA0: '', ERA1: '', COUNT0: 'th', COUNT1: 'st', COUNT2: 'nd', COUNT3: 'rd',
-		COUNT21: 'st', COUNT22: 'nd', COUNT23: 'rd', COUNT31: 'st', COUNTN: 'th'
-	},
-	getDefaultLocaleInfo : function(key){return(this._defaultLocaleInfo[key]);},
+	getDefaultLocaleInfo : function(key){return(defaultLocaleInfo[key]);},
 
 	/**
 	 * determine if a year is a leap year
@@ -79,72 +143,13 @@
 	 * @private
 	 */
 	molad : function(m,y) {
+		var passedMonths, molad;
 		// figure out what year we are in
 		//  nisan of 5760 as listed is really nisan 5761
 		y = m < this.TISHREI ? y + 1 : y;
-		var passedMonths = m - this.TISHREI + Math.floor((235*y - 234) / 19);
-		var molad = this.RD0_DAYS - this.MOLAD_1_OFFSET_MIDNIGHT_FRACTION + passedMonths*this.MOLAD_STD_OFFSET_DAYS; 
+		passedMonths = m - this.TISHREI + Math.floor((235*y - 234) / 19);
+		molad = this.RD0_DAYS - this.MOLAD_1_OFFSET_MIDNIGHT_FRACTION + passedMonths*this.MOLAD_STD_OFFSET_DAYS; 
 		return(molad);
-	},
-	
-	/**
-	 * Private function to return how many days are prior to a given year
-	 * @private
-	 */
-	daysBefore : {},
-	daysBeforeYear : function(y) {
-		// first see if it was cached
-		var daysBefore = this.daysBefore;
-		if (!daysBefore[y]) {
-			// determine the day based on the months since the beginning of the calendar multiplied by the length of each month
-			// ideally, day = molad(this.TISHREI,y)
-			// however, this can get close to overrunning 32-bit, which many computers still operate on, so we do it separately
-			var months = Math.floor((235*y-234)/19);
-			var parts = this.parts.molad_1_noon_offset + this.parts.molad*months;
-			var day = 29*months + Math.floor(parts/this.parts.day);
-		
-			// account for the fact that Rosh Hashanah cannot be Sun/Wed/Fri
-			if ((3*(day+1))%7 < 3) {
-				day = day+1;
-			}
-			daysBefore[y] = day-1;
-		}
-		return(daysBefore[y]);
-	},
-	
-	/**
-	 * Private function to determine how much we delay Rosh Hashanah for a given year
-	 * @private
-	 */
-	delays : {},
-	delayRoshHashanah : function(y) {
-		// we need to know how many days are before last year, this year and next year
-		var lastYear = this.daysBeforeYear(y-1);
-		var thisYear = this.daysBeforeYear(y);
-		var nextYear = this.daysBeforeYear(y+1);
-	
-		// by default, there is no special delay, unless this year is too long or last year is too short
-		var delay = 0;
-		if (nextYear - thisYear == 356) {
-			// this coming year will be too long, so we delay RH two days to shorten it
-			delay = 2;
-		} else if (thisYear - lastYear == 382) {
-			// last year was too short, so we delay RH one day to lengthen it
-			delay = 1;
-		}
-		return(delay);
-	},
-	
-	/**
-	 * Private function to determine the RD date of Rosh Hashanah, using the days before and delay private functions
-	 * @private
-	 */
-	rhDay : {},
-	roshHashanah : function(y) {
-		if (!this.rhDay[y]) {
-			this.rhDay[y] = this.RD0_DAYS + this.daysBeforeYear(y) + this.delayRoshHashanah(y)+1;
-		}
-		return(this.rhDay[y]);
 	},
 	
 	/**
@@ -167,46 +172,47 @@
 	 */
 	daysToCalendar : function(date) {
 		// calculate the y/m/d
+		var year, leap, priorDays, month, monthDays, monthsInYear, daysInMonth, a, day, era, cal;
 		
 		// days between our date and epoch of Hebrew calendar
 		// first calculate the approximate year. The solar year has around 365.25 days, 
 		//  and since this is an estimate, that is good enough. So how many solar years have there been, approximately?
 		//  the estimate can be off from -1 until +1, to start by setting it to -1
-		var year = Math.floor((date - this.RD0_DAYS)/this.DAYS_IN_SOLAR_YEAR) - 1;
+		year = Math.floor((date - this.RD0_DAYS)/this.DAYS_IN_SOLAR_YEAR) - 1;
 		// check the date of Rosh Hashanah each year from year-1 until we have a year that rosh hashanah is after our date
-		while(this.roshHashanah(year+1) <= date) {
+		while(roshHashanah(year+1) <= date) {
 			year++;
 		}
 		
 		// is this year a leap year?
-		var leap = this.isLeapYear(year);
+		leap = this.isLeapYear(year);
 		
 		// how many individual days are left? it is the date minus the date of Rosh Hashanah
-		var priorDays = date - this.roshHashanah(year);
+		priorDays = date - roshHashanah(year);
 		
 		// now figure out how many months that is by adding up each month		
-		var month = 1;
-		var monthDays = 0;
-		var monthsInYear = this.getMaxMonth(0,year);
-		var daysInMonth = this.getMaxDate(0,year,(month+monthsInYear+this.TISHREI-2)%monthsInYear+1);
+		month = 1;
+		monthDays = 0;
+		monthsInYear = this.getMaxMonth(0,year);
+		daysInMonth = this.getMaxDate(0,year,(month+monthsInYear+this.TISHREI-2)%monthsInYear+1);
 		// if (number of days elapsed in prior months) plus (days in next month) <= (leftover days)
 		//   then increment month, add the days in the next month, get the days for the following month
 		while(monthDays + daysInMonth <= priorDays && month < monthsInYear) {
 			month++;
 			monthDays += daysInMonth;
 			daysInMonth = this.getMaxDate(0,year,(month+monthsInYear+this.TISHREI-2)%monthsInYear+1);
-			var a = daysInMonth;
+			a = daysInMonth;
 		}
 		// the last month is the one we wanted
 		month = (month+monthsInYear+this.TISHREI-2)%monthsInYear+1;
 
 		// now we have the year and the month. The remainder is the days in the month
-		var day = priorDays - monthDays + 1;  // THIS MUST BE OFF
+		day = priorDays - monthDays + 1;  // THIS MUST BE OFF
 
 		// the era in the Hebrew calendar is always 0
-		var era = 0;
+		era = 0;
 
-		var cal = {ERA: era, YEAR: year, MONTH: month, DATE: day, DAY_OF_YEAR: priorDays+1, LEAP: leap?1:0};
+		cal = {ERA: era, YEAR: year, MONTH: month, DATE: day, DAY_OF_YEAR: priorDays+1, LEAP: leap?1:0};
 		return(cal);
 	},
 
@@ -224,17 +230,18 @@
 	 * @private
 	 */
 	calendarToDays : function(e,y,m,d) {
-
+		var yearDays, monthDays, month, leap, monthsInYear, fd;
+		
 		// first find the RD of Rosh Hashanah of the given Hebrew year
-		var yearDays = this.roshHashanah(y);
+		yearDays = roshHashanah(y);
 		
 		// next add the number of days in the months prior to the given month
 		// this is not simple addition, since we start our month counting in Nisan rather than Tishrei, 
 		//   which is where year counting starts
-		var monthDays = 0;
-		var month = 1;
-		var leap = this.isLeapYear(y);
-		var monthsInYear = this.getMaxMonth(0,y);
+		monthDays = 0;
+		month = 1;
+		leap = this.isLeapYear(y);
+		monthsInYear = this.getMaxMonth(0,y);
 		m = (m + monthsInYear-this.TISHREI)%monthsInYear+1;
 		
 		for (month=1;month<m;month++) {
@@ -242,7 +249,7 @@
 		}
 		
 		// finally, add the number of days actually given and the RD of the epoch Hebrew calendar
-		var fd = yearDays + monthDays + d -1;
+		fd = yearDays + monthDays + d -1;
 		return(fd);
 	},
 	
@@ -258,7 +265,7 @@
 	getMinMonth : function(era,year) {return(1);},
 	getMaxDate : function(era,year,month) {
 		// even months have a maxdate of 30, except in special cases
-		var maxDate = 30;
+		var maxDate = 30, daysInYear7, daysInYear8;
 		
 		/* so what are our special cases?
 		 * 1) Cheshvan can have 29 or 30
@@ -279,20 +286,20 @@
 			case 8:
 				// cheshvan is normally 29 (as 7%2 = 1), unless it is long
 				// it is long if this year has 355 or 385 days
-				var daysInYear7 = this.roshHashanah(year+1)-this.roshHashanah(year);
-				maxDate = (daysInYear7 == 355 || daysInYear7 == 385) ? 30 : 29;
+				daysInYear7 = roshHashanah(year+1)-roshHashanah(year);
+				maxDate = (daysInYear7 === 355 || daysInYear7 === 385) ? 30 : 29;
 				break;
 			// Kislev
 			case 9:
 				// Kislev is normally 30 (as 8%2 = 0), unless it is short
 				// it is short if this year has 353 or 383 days
-				var daysInYear8 = this.roshHashanah(year+1)-this.roshHashanah(year);
-				maxDate = (daysInYear8 == 353 || daysInYear8 == 383) ? 29 : 30;
+				daysInYear8 = roshHashanah(year+1)-roshHashanah(year);
+				maxDate = (daysInYear8 === 353 || daysInYear8 === 383) ? 29 : 30;
 				break;
 			// all others
 			default:
 				// even months have a maxdate of 29, except in special cases
-				maxDate = month%2 == 0 ? 29 : 30;
+				maxDate = month%2 === 0 ? 29 : 30;
 				break;
 		}
 		
@@ -301,8 +308,8 @@
 	getMinDate : function(era,year,month) {return(1);},
 	getMaxDayOfYear : function(era,year) {
 		// calculate the last possible day of the year. Could be one of 353,354,355,383,384,385
-		var daysInYear = this.roshHashanah(year+1)-this.roshHashanah(year);
+		var daysInYear = roshHashanah(year+1)-roshHashanah(year);
 		return(daysInYear);		
 	},
 	getMinDayOfYear : function(era,year) {return(1);}
-}
+};

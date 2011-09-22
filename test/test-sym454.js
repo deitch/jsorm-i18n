@@ -1,13 +1,12 @@
-/*global testFn,JSORM */
-testFn.testSym454Calendar = function(T) {
-	var cal;
-	var retText = null;
+/*global JSORM, nodeunit, testFn, testCalImpl */
+testFn.testSym454Calendar = (function() {
+	var refDates, o, years, maxDates;
 
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by sym454.org (Irv Bromberg)
 	//  day of year, week of month, week of year calculated by genRefDates.java
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [							// in Sym454
+	refDates = [							// in Sym454
 		[-214193, -586, 7, 21, 0, 205, 4, 30], // -586,7,21
 		[-61387, -168, 12, 3, 3, 340, 1, 49], // -168,12,3
 		[-61362, -168, 12, 28, 3, 340, 1, 49], // -168, 12, 28
@@ -45,7 +44,7 @@ testFn.testSym454Calendar = function(T) {
 		[764652, 2094, 7, 21, 0, 199, 3, 29] // 2094,7,21
 	];
 
-	var maxDates = [
+	maxDates = [
 		{year:1959,month:1,expect:28},
 		{year:1959,month:2,expect:35},
 		{year:1959,month:3,expect:28},
@@ -120,7 +119,7 @@ testFn.testSym454Calendar = function(T) {
 		{year:1900,month:12,expect:28}
 	];
 
-	var years = [
+	years = [
 		{year: 1900, leap: false, months:12,days: 364},
 		{year: 1901, leap: false, months:12,days: 364},
 		{year: 1960, leap: false, months:12,days: 364},
@@ -141,7 +140,7 @@ testFn.testSym454Calendar = function(T) {
 	];
 
 	// get the configuration object literal
-	var o = testCalImpl(T,"Sym454 Calendar Tests","../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
-	return new T.testCase(o);
-};
+	o = testFn.testCalImpl("../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	return {"Sym454 Calendar Tests":nodeunit.testCase(o)};
+}());
 

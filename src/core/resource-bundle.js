@@ -200,7 +200,7 @@ exports.ResourceBundle = extend({},function(config){
 		 * @memberOf JSORM.ResourceBundle
 		 */
 		getBundle : function(config) {
-			var name = config.name, locale = config.locale, callback = config.callback, ptopts = config.options, path, 
+			var name = config.name || "", locale = config.locale, callback = config.callback, ptopts = config.options, path, 
 			i, url, rbopts, rbCallback, ajaxCallback, list, checker = [], count;
 			
 			// the paths we use

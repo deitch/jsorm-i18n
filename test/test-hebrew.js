@@ -1,10 +1,11 @@
-/*global JSORM */
-testFn.testHebrewCalendar = function(T) {
+/*global JSORM, nodeunit, testFn, testCalImpl */
+testFn.testHebrewCalendar = (function() {
+	var refDates, o, years, maxDates;
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
 	//  day of year, week of month, week of year calculated by genRefDates.java
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [
+	refDates = [
 		[-214193, 3174, 5, 10],
 		[-61387, 3593, 9, 25],
 		[25469, 3831, 7, 3],
@@ -40,7 +41,7 @@ testFn.testHebrewCalendar = function(T) {
 		[764652, 5854, 5, 5]
 	];
 	
-	var years = [
+	years = [
 		{year: 5700, leap: true, days: 385, months: 13},
 		{year: 5701, leap: false, days: 354, months: 12},
 		{year: 5702, leap: false, days: 355, months: 12},
@@ -343,7 +344,7 @@ testFn.testHebrewCalendar = function(T) {
 		{year: 5999, leap: true, days: 385, months: 13},
 		{year: 6000, leap: false, days: 353, months: 12}
 	];
-	var maxDates = [
+	maxDates = [
 		{year:5768,month:1,expect:30},
 		{year:5768,month:2,expect:29},
 		{year:5768,month:3,expect:30},
@@ -371,9 +372,9 @@ testFn.testHebrewCalendar = function(T) {
 		{year:5769,month:12,expect:29}
 	];
 	
-	var years = [];
+	years = [];
 
 	// get the configuration object literal
-	var o = testCalImpl(T,"Hebrew Calendar Tests","../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
-	return new T.testCase(o);
-};
+	o = testFn.testCalImpl("../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	return {"Hebrew Calendar Tests":nodeunit.testCase(o)};
+}());

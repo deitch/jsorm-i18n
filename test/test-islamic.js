@@ -1,12 +1,11 @@
-/*global JSORM */
-testFn.testIslamicCalendar = function(T) {
-	var cal;
-	var retText = null;
+/*global JSORM, nodeunit, testFn, testCalImpl */
+testFn.testIslamicCalendar = (function(T) {
+	var cal, retText = null, refDates, maxDates, years, o;
 
 	// test bundles: [rd,m,y,d,dow]
 	// reference dates, incl. y/m/d/dow given by Calendrical Calculations (Reingold & Dershowitz)
 	// each refDate entry is [rd,year,month,date,dayOfWeek,dayOfYear,weekOfMonth,weekOfYear]
-	var refDates = [
+	refDates = [
 		[-214193, -1245, 12, 9, 0],
 		[-61387, -813, 2, 23, 3],
 		[25469,-568, 4, 1, 3],
@@ -42,7 +41,7 @@ testFn.testIslamicCalendar = function(T) {
 		[764652, 1518, 3, 5, 0]
 	];
 
-	var maxDates = [
+	maxDates = [
 		{year:1000,month:1,expect:30},
 		{year:1000,month:2,expect:29},
 		{year:1000,month:3,expect:30},
@@ -81,12 +80,12 @@ testFn.testIslamicCalendar = function(T) {
 		{year:900,month:12,expect:29}
 	];
 
-	var years = [
+	years = [
 		{year: 1000, leap: true, months: 12, days: 355},
 		{year: 900, leap: false, months: 12, days: 354}
 	];
 
-	var o = testCalImpl(T,"Islamic Calendar Tests","../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
-	return new T.testCase(o);
-};
+	o = testFn.testCalImpl("../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	return {"Islamic Calendar Tests": nodeunit.testCase(o)};
+}());
 

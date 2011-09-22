@@ -32,10 +32,10 @@ To test in browser:
   open a browser (Firefox is best) to the site http://localhost:8080/test/test.html
 
 To test in nodejs:
-  cd to the root director
+  cd to the root directory
   cd to test/
-  make sure you have the right npm modules installed
-      npm install underscore nodeunit
+  make sure you have the right npm modules installed. They are all listed in package.json under devDependencies
+      npm install underscore nodeunit jsorm-utilities
   node ./nodetest.js <test test ...>
       each test is the name of a section to test, e.g. calendar, core, currency, etc. separated by whitespace, or "all" for all
       the name of a test is a js file in the same directory, formatted as test-*.js
