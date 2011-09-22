@@ -1,6 +1,6 @@
 { 
 	"name": "jsorm-i18n", 
-	"description": "A JavaScript library for i18n: calendar conversions, timezones, i18n resource bundles, currency rendering",
+	"description": "A JavaScript library for i18n: calendar conversions (Gregorian, Julian, Hebrew, Islamic, Sym010, Sym454, others), timezones, i18n resource bundles, currency rendering",
 	"version": "@@version@@",
 	"url": "http://github.com/deitch/jsorm-i18n",
 	"author": "Avi Deitcher <avi@deitcher.net>",
