@@ -6,7 +6,7 @@
   <!-- name of the latest version of jsorm.i18n we are working with -->
   <property name="zoneversion" value="2009u"/>
   <!-- name of the latest version of i18n we are working with -->
-  <property name="version" value="2.0.0"/>
+  <property name="version" value="2.0.1"/>
 
 
   <property file="build.properties"/>
