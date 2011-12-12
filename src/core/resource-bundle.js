@@ -201,7 +201,7 @@ exports.ResourceBundle = extend({},function(config){
 		 */
 		getBundle : function(config) {
 			var name = config.name || "", locale = config.locale, callback = config.callback, ptopts = config.options, path, 
-			i, url, rbopts, rbCallback, ajaxCallback, list, checker = [], count;
+			i, url, rbopts, rbCallback, ajaxCallback, list, checker = [], count, waiting = {};
 			
 			// the paths we use
 			path = config.path || myclass().path;
@@ -243,8 +243,12 @@ exports.ResourceBundle = extend({},function(config){
 			ajaxCallback = function(url,xmlHttp,success,options){
 				// if we were successful, read in the bundle - read every bundle we get, even if 
 				//   we have a specific match
-				bundles[url] = success ? myclass()({name:options.name,locale:options.locale,data:xmlHttp.responseText}) : false;	
-				options.rbc(success,options);
+				// did we already call this once?
+				if (waiting[url]) {
+					delete waiting[url];
+					bundles[url] = success ? myclass()({name:options.name,locale:options.locale,data:xmlHttp.responseText}) : false;	
+					options.rbc(success,options);
+				}
 			};
 			for (i=0;i<list.length;i++) {
 				url = checker[i].url;
@@ -259,6 +263,7 @@ exports.ResourceBundle = extend({},function(config){
 				} else {
 					// make the ajax call with the async callback
 					rbopts.rbc = rbCallback;
+					waiting[url] = true;
 					utils.getFile(url,ajaxCallback,rbopts);
 				}
 			}
