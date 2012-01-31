@@ -14,9 +14,11 @@ testFn.testCurrency = (function() {
 						["Whole negative with decimals",'-\u20aa'+'15.25',-15.25],["Whole negative",'-\u20aa'+'2.00',-2]]},
 				  "CAD":{name: 'Dollars', country: 'Canada', tests: [["Whole positive with decimals","$20.00",20.00],["Whole positive","$15.00",15],
 						["Whole negative with decimals",'-$15.25',-15.25],["Whole negative",'-$2.00',-2]]}
+        , "BTC":{name: 'Bitcoins', country: 'N/A', tests: [["Postive fraction","0.00010000",0.0001],["Whole number positive","15.00000000",15],
+            ["Whole negative with decimals","-15.25000000",-15.25],["Whole negative","-2.00000000",-2],["Negative fraction","-0.00004000",-0.00004]]}
 				};
 	// expected number of currencies
-	numCurrencies = 127;
+	numCurrencies = 128;
 	/*
 	 * Functions to test currency functionality.
 	 * These are the tests we want to perform:
