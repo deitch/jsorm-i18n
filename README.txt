@@ -5,7 +5,7 @@
      Java-style properties files, and follow the same locale sequence.
  2) Currency : format currency into the appropriate country-specific format. 
  3) TimeZone : refer to a specific timezone. Includes all offset from UTC information and daylight savings time
-     information. Uses a specially compiled JSON version of the Elsie ZoneInfo files in use on all Unix variants
+     information. Uses a specially compiled JSON version of the Elsie (now IANA) ZoneInfo files in use on all Unix variants
      as well as Java. In order to keep it lightweight, the necessary information for a particular TimeZone is
      retrieved via Ajax.
  4) Locale : refer to localized information, specifically covering dates and times, for a specific locale.
