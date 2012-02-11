@@ -4,7 +4,7 @@
 
 <project name="js-i18n" default="all" basedir=".">
   <!-- name of the latest version of jsorm.i18n we are working with -->
-  <property name="zoneversion" value="2009u"/>
+  <property name="zoneversion" value="2011n"/>
   <!-- name of the latest version of i18n we are working with -->
   <property name="version" value="2.0.4"/>
 
