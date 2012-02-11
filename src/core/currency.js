@@ -126,7 +126,7 @@ exports.currency = extend({},(function() {
 		PLN : {dec : '.', symbol : 'z\u0142', group : ',', after : false, currency : 'Zlotych', country : 'Poland', significantFigures: 2},
 		QAR : {dec : '.', symbol : '\ufdfc', group : ',', after : false, currency : 'Rials', country : 'Qatar', significantFigures: 2},
 		RON : {dec : '.', symbol : 'lei', group : ',', after : false, currency : 'New Lei', country : 'Romania', significantFigures: 2},
-		RUB : {dec : '.', symbol : '\u0440\u0443\u0431', group : ',', after : false, currency : 'Rubles', country : 'Russia', significantFigures: 2},
+		RUB : {dec : '.', symbol : '\u0440\u0443\u0431', group : ',', after : true, currency : 'Rubles', country : 'Russia', significantFigures: 2},
 		SHP : {dec : '.', symbol : '\u00a3', group : ',', after : false, currency : 'Pounds', country : 'Saint Helena', significantFigures: 2},
 		SAR : {dec : '.', symbol : '\ufdfc', group : ',', after : false, currency : 'Riyals', country : 'Saudi Arabia', significantFigures: 2},
 		RSD : {dec : '.', symbol : '\u0414\u0438\u043d.', group : ',', after : false, currency : 'Dinars', country : 'Serbia', significantFigures: 2},
