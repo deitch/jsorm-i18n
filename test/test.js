@@ -5,7 +5,7 @@
  * rest api test cases for studymesh
  */
 var tests = [], tmp = {}, _ = require('underscore'), exec = require('child_process').exec,
-nodeunit = require('nodeunit'), fs = require('fs'), vm = require('vm'), sys = require('sys'), arg, testFn = {}, 
+nodeunit = require('nodeunit'), fs = require('fs'), vm = require('vm'), arg, testFn = {}, 
 jsormUtil = require('jsorm-utilities'), jsorm = require('./jsorm-i18n-src'), code, 
 sandbox = {testFn: testFn, JSORM: jsormUtil.apply(jsorm,jsormUtil), nodeunit:nodeunit},
 runTests, testRunner;
