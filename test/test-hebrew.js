@@ -375,6 +375,6 @@ testFn.testHebrewCalendar = (function() {
 	years = [];
 
 	// get the configuration object literal
-	o = testFn.testCalImpl("../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/hebrew.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
 	return {"Hebrew Calendar Tests":nodeunit.testCase(o)};
 }());

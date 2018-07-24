@@ -1,16 +1,28 @@
-{ 
-	"name": "jsorm-i18n", 
+{
+	"name": "jsorm-i18n",
 	"description": "A JavaScript library for i18n: calendar conversions (Gregorian, Julian, Hebrew, Islamic, Sym010, Sym454, others), timezones, i18n resource bundles, currency rendering",
-	"version": "@@version@@",
+	"version": "2.0.5",
 	"url": "http://github.com/deitch/jsorm-i18n",
 	"author": "Avi Deitcher <avi@deitcher.net>",
-	"engines": ["node >= 0.3"],
-	"main": "./lib/jsorm-i18n.js", 
-	"test": "./test.js",
-	"dependencies": {"jsorm-utilities":">=1.3.0"},
-	"devDependencies": {"jsorm-utilities":">=1.3.0","underscore":">=1.1.0","nodeunit":">=0.5.0","uglify-js":"1.2.x"},
+	"engines": [
+		"node >= 0.3"
+	],
+	"main": "./lib/jsorm-i18n.js",
+	"scripts": {
+		"test": "node ./test/test.js"
+	},
+	"dependencies": {
+		"jsorm-utilities": ">=1.3.0"
+	},
+	"devDependencies": {
+		"jsorm-utilities": ">=1.3.0",
+		"minimist": "^1.2.0",
+		"nodeunit": ">=0.5.0",
+		"uglify-js": "^2.8.29",
+		"underscore": ">=1.1.0"
+	},
 	"repository": {
-		"type" : "git",
-		"url" : "http://github.com/deitch/jsorm-i18n.git"
+		"type": "git",
+		"url": "http://github.com/deitch/jsorm-i18n.git"
 	}
 }

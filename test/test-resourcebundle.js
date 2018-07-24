@@ -2,7 +2,7 @@
 testFn.testResourceBundle = (function() {
 	var B = JSORM.ResourceBundle;
 	// set paths
-	B.path = 'core/';
+	B.path = __dirname+'/core/';
 
 	return {
 		"ResourceBundle tests": nodeunit.testCase({

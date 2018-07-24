@@ -1856,7 +1856,7 @@ testFn.testCalendar = (function() {
 	}
 
 	function setUpCalendar(cal,callback) {
-		var cb, cb2, basepath = '../', calpath = 'src/calendars/', localePath = 'test/core/', locale = 'en_US', config, zone;
+		var cb, cb2, basepath = __dirname+'/../', calpath = 'src/calendars/', localePath = 'test/core/', locale = 'en_US', config, zone;
 		
 		zone = conf[cal].zone;
 		cb2 = function(success,calInst,options,e) {
@@ -1873,7 +1873,7 @@ testFn.testCalendar = (function() {
 		config.date = new Date(conf[cal].time);
 
 
-		TZ.basepath =  '../';
+		TZ.basepath =  basepath;
 		//TZ.path = 'zonebuild/';
 		TZ.path = 'build/zoneinfo/';
 		

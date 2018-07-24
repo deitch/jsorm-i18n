@@ -141,7 +141,7 @@ testFn.testSym010Calendar = (function() {
 	];
 
 	// get the configuration object literal
-	o = testFn.testCalImpl("../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/sym010.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return {"Sym010 Calendar Tests":nodeunit.testCase(o)};
 }());
 

@@ -96,7 +96,7 @@ testFn.testJulianCalendar = (function() {
 	];
 
 	// get the configuration object literal
-	o = testFn.testCalImpl("../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/julian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return {"Julian Calendar Tests": nodeunit.testCase(o)};
 }());
 

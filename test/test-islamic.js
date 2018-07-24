@@ -85,7 +85,7 @@ testFn.testIslamicCalendar = (function(T) {
 		{year: 900, leap: false, months: 12, days: 354}
 	];
 
-	o = testFn.testCalImpl("../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/islamic.json",years,maxDates,refDates,JSORM.calendar.SUNSET);
 	return {"Islamic Calendar Tests": nodeunit.testCase(o)};
 }());
 

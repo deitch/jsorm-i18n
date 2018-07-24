@@ -97,7 +97,7 @@ testFn.testGregorianCalendar = (function() {
 	];
 
 	// get the configuration object literal
-	o = testFn.testCalImpl("../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/gregorian.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return {"Gregorian Calendar Tests": nodeunit.testCase(o)};
 }());
 

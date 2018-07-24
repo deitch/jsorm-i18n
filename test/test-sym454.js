@@ -140,7 +140,7 @@ testFn.testSym454Calendar = (function() {
 	];
 
 	// get the configuration object literal
-	o = testFn.testCalImpl("../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
+	o = testFn.testCalImpl(__dirname+"/../src/calendars/sym454.json",years,maxDates,refDates,JSORM.calendar.MIDNIGHT);
 	return {"Sym454 Calendar Tests":nodeunit.testCase(o)};
 }());
 

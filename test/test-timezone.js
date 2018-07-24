@@ -1,6 +1,6 @@
 /*global JSORM, testFn, nodeunit */
 testFn.testTimeZone = (function() {
-	var TZ = JSORM.TimeZone, zones, expectedVersion = "2009u", numZones = 402;
+	var TZ = JSORM.TimeZone, zones, expectedVersion = "2011n", numZones = 414;
 	// list of zones to test and test inputs and expected outputs
 	// each key is the name of a zone to load and check
 	// each value is an array of tests
@@ -16,7 +16,7 @@ testFn.testTimeZone = (function() {
 				};
 	
 	
-	TZ.basepath =  '../';
+	TZ.basepath =  __dirname+'/../';
 	TZ.path = 'build/zoneinfo/';
 	
 	return {"Timezone Tests": nodeunit.testCase({
