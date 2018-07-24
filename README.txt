@@ -40,7 +40,6 @@ To test in nodejs:
       each test is the name of a section to test, e.g. calendar, core, currency, etc. separated by whitespace, or "all" for all
       the name of a test is a js file in the same directory, formatted as test-*.js
 
-Extensive wiki at http://jsorm.com/wiki
 
 
 	
